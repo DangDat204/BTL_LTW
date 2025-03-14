@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng Nhập</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .container {
+            display: flex;
+            height: 100vh;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #6dd5ed, #2193b0);
+        }
+
+        .wrap {
+            display: flex;
+            background: #fff;
+            border-radius: 10px;
+            overflow: hidden;
+            max-width: 900px;
+            width: 100%;
+        }
+
+        .left {
+            width: 50%;
+            height: 70vh;
+            background: url('https://img.lovepik.com/photo/40011/9612.jpg_wh860.jpg') no-repeat center;
+            background-size: cover;
+        }
+
+        .right {
+            width: 50%;
+            height: 70vh;
+            padding: 50px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .title {
+            font-size: 24px;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+            position: relative;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        .input-group i {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #aaa;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px;
+            background: #2f80ed;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .text-center {
+            text-align: center;
+            margin-top: 15px;
+        }
+
+        .text-center a {
+            color: #2f80ed;
+            text-decoration: none;
+        }
+
+        @media (max-width: 768px) {
+            .wrap {
+                flex-direction: column;
+            }
+            .left {
+                display: none;
+            }
+            .right {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+<div class="container">
+    <div class="wrap">
+        <div class="left"></div>
+        <form class="right" th:action="@{/user/login/credentials}" method="post">
+            <div class="title">Đăng Nhập</div>
+            <div class="input-group">
+                <input type="text" name="username" placeholder="Tên đăng nhập(*)" required>
+                <i class="fa fa-user"></i>
+            </div>
+            <div class="input-group">
+                <input type="password" name="password" placeholder="Mật khẩu(*)" required>
+                <i class="fa fa-lock"></i>
+            </div>
+            <button type="submit" class="btn">Đăng nhập</button>
+            <!-- <div class="text-center">
+                <a th:href="@{/user/retrievePassword}">Quên mật khẩu?</a>
+            </div> -->
+            <div class="text-center">
+                <a th:href="@{/user/register}">Tạo tài khoản mới</a>
+            </div>
+        </form>
+    </div>
+</div>
+</body>
+
+</html>

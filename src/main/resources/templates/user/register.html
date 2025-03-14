@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(135deg, #6dd5ed, #2193b0);
+        }
+
+        .container {
+            background: #fff;
+            border-radius: 12px;
+            overflow: hidden;
+            width: 90%;
+            max-width: 850px;
+            display: flex;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .left-section {
+            flex: 1;
+            background: url('https://img.lovepik.com/photo/40011/9612.jpg_wh860.jpg') no-repeat center;
+            background-size: cover;
+        }
+
+        .right-section {
+            flex: 1;
+            padding: 40px;
+        }
+
+        .form-title {
+            font-size: 24px;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .input-group {
+            position: relative;
+            margin-bottom: 15px;
+        }
+
+        .input-group input, .input-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            font-size: 14px;
+            transition: 0.3s;
+        }
+
+        .input-group input:focus, .input-group select:focus {
+            border-color: #2193b0;
+            outline: none;
+            box-shadow: 0 0 5px rgba(33, 147, 176, 0.5);
+        }
+
+        .btn {
+            width: 100%;
+            background: #2193b0;
+            color: white;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .btn:hover {
+            background: #176b80;
+        }
+
+        .text-center {
+            text-align: center;
+            margin-top: 15px;
+        }
+
+        .text-center a {
+            color: #2193b0;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        @media screen and (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+            .left-section {
+                height: 200px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+<div class="container">
+    <div class="left-section"></div>
+    <div class="right-section">
+        <div class="form-title">Đăng ký</div>
+        <form id="registerForm" method="post">
+            <div class="input-group">
+                <input type="text" name="username" placeholder="Tên đăng nhập(*)" required>
+            </div>
+            <div class="input-group">
+                <input type="email" name="email" placeholder="Email(*)" required pattern="^[\w.%+-]+@gmail\.com$">
+            </div>
+            <div class="input-group">
+                <input type="text" name="fullname" placeholder="Họ và tên(*)" required>
+            </div>
+            <div class="input-group">
+                <input type="tel" name="tel" placeholder="Số điện thoại(*)" required>
+            </div>
+            <div class="input-group">
+                <input type="password" name="password" placeholder="Mật khẩu(*)" required>
+            </div>
+            <div class="input-group">
+                <select name="role_id" required>
+                    <option value="1">Người thuê</option>
+                    <option value="2">Chủ nhà</option>
+                </select>
+            </div>
+            <button type="submit" class="btn">Đăng ký</button>
+        </form>
+        <div class="text-center">
+            <a href="/user/login">Đã có tài khoản? Đăng nhập</a>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById("registerForm").addEventListener("submit", function(event) {
+        event.preventDefault(); // Ngăn form gửi dữ liệu theo cách mặc định
+
+        // Lấy dữ liệu từ các trường input
+        const formData = {
+            username: document.querySelector('input[name="username"]').value,
+            email: document.querySelector('input[name="email"]').value,
+            fullname: document.querySelector('input[name="fullname"]').value,
+            tel: document.querySelector('input[name="tel"]').value,
+            password: document.querySelector('input[name="password"]').value,
+            role_id: document.querySelector('select[name="role_id"]').value
+        };
+
+        // Gửi yêu cầu POST tới API
+        fetch('http://localhost:8080/user/register', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(formData) // Chuyển dữ liệu thành JSON
+        })
+        .then(response => response.json()) // Nhận phản hồi từ API
+        .then(data => {
+            if (data.code === 1000) {
+                alert("Đăng ký thành công!");
+                window.location.href = "/user/login"; // Chuyển hướng sau khi đăng ký thành công
+            } else {
+                alert("Đăng ký thất bại: " + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Lỗi:', error);
+            alert("Có lỗi xảy ra khi gọi API!");
+        });
+    });
+</script>
+</body>
+</html>
