@@ -10,32 +10,43 @@ import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @MappedSuperclass
 @Getter
 @Setter
 @EntityListeners(AuditingEntityListener.class)
-public abstract class BaseEntity implements Serializable {
-
-    private static final long serialVersionUID = 1L;
+public abstract class BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private boolean deleted = false;
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt;
 
-    @CreationTimestamp
-    private Date createdAt;
-
-    @UpdateTimestamp
-    private Date updatedAt;
-
-    @CreatedBy
+    @Column(name = "created_by")
     private String createdBy;
 
-    @LastModifiedBy
+    @Column(name = "deleted")
+    private Boolean deleted = false;
+
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+
+    @Column(name = "updated_by")
     private String updatedBy;
+
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
 
 }

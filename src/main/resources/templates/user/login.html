@@ -114,7 +114,7 @@
 <div class="container">
     <div class="wrap">
         <div class="left"></div>
-        <form class="right" th:action="@{/user/login/credentials}" method="post">
+        <form class="right" id="loginForm" method="post">
             <div class="title">Đăng Nhập</div>
             <div class="input-group">
                 <input type="text" name="username" placeholder="Tên đăng nhập(*)" required>
@@ -125,15 +125,70 @@
                 <i class="fa fa-lock"></i>
             </div>
             <button type="submit" class="btn">Đăng nhập</button>
-            <!-- <div class="text-center">
-                <a th:href="@{/user/retrievePassword}">Quên mật khẩu?</a>
-            </div> -->
             <div class="text-center">
                 <a th:href="@{/user/register}">Tạo tài khoản mới</a>
             </div>
+            <!-- Thêm phần hiển thị thông báo lỗi/thành công -->
+            <div id="message" class="text-center" style="color: red; margin-top: 10px;"></div>
         </form>
     </div>
 </div>
+
+<script>
+    // Lắng nghe sự kiện submit của form
+    document.getElementById('loginForm').addEventListener('submit', function(event) {
+        event.preventDefault(); // Ngăn hành vi submit mặc định
+
+        // Lấy giá trị từ form
+        const username = document.querySelector('input[name="username"]').value;
+        const password = document.querySelector('input[name="password"]').value;
+
+        // Tạo payload để gửi đến API
+        const payload = {
+            username: username,
+            password: password
+        };
+
+        // Gửi request đến API
+        fetch('/auth/log-in', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(payload)
+        })
+        .then(response => response.json()) // Parse JSON từ response
+        .then(data => {
+            // Xử lý response từ API
+            const messageDiv = document.getElementById('message');
+
+            if (data.result.authenticated === true) {
+                 // Lưu token vào localStorage hoặc sessionStorage
+                localStorage.setItem('jwtToken', data.result.token); // Lưu token
+                console.log('Token saved:', data.result.token);
+
+                // Đăng nhập thành công
+                messageDiv.style.color = 'green';
+                messageDiv.textContent = 'Đăng nhập thành công! Đang chuyển hướng...';
+                // Chuyển hướng sau 2 giây
+                setTimeout(() => {
+                    window.location.href = '/dashboard'; // Thay '/dashboard' bằng URL của trang chính
+                }, 2000);
+            } else {
+                // Đăng nhập thất bại
+                messageDiv.style.color = 'red';
+                messageDiv.textContent = 'Tên đăng nhập hoặc mật khẩu không đúng!';
+            }
+        })
+        .catch(error => {
+            // Xử lý lỗi (ví dụ: mạng lỗi, server không phản hồi)
+            const messageDiv = document.getElementById('message');
+            messageDiv.style.color = 'red';
+            messageDiv.textContent = 'Đã có lỗi xảy ra. Vui lòng thử lại sau!';
+            console.error('Error:', error);
+        });
+    });
+</script>
 </body>
 
 </html>

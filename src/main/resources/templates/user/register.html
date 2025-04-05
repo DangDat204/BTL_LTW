@@ -132,9 +132,9 @@
                 <input type="password" name="password" placeholder="Mật khẩu(*)" required>
             </div>
             <div class="input-group">
-                <select name="role_id" required>
-                    <option value="1">Người thuê</option>
-                    <option value="2">Chủ nhà</option>
+                <select name="role" required>
+                    <option value="tenant">Người thuê</option>
+                    <option value="landlord">Chủ nhà</option>
                 </select>
             </div>
             <button type="submit" class="btn">Đăng ký</button>
@@ -156,7 +156,7 @@
             fullname: document.querySelector('input[name="fullname"]').value,
             tel: document.querySelector('input[name="tel"]').value,
             password: document.querySelector('input[name="password"]').value,
-            role_id: document.querySelector('select[name="role_id"]').value
+            role: document.querySelector('select[name="role"]').value
         };
 
         // Gửi yêu cầu POST tới API

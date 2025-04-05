@@ -1,27 +1,27 @@
 package com.example.BTL.enums;
 
-import com.fasterxml.jackson.annotation.JsonValue;
-import lombok.Getter;
 
 import java.util.stream.Stream;
 
 public enum RoleEnum {
+    TENANT("tenant"),
+    LANDLORD("landlord"),
+    ADMIN("admin");
 
-    Tenant(1),
-    Landlord(2),
-    Admin(3);
+    private final String value;
 
-    @Getter(onMethod_ = @JsonValue)
-    private final Integer value;
-
-    RoleEnum(Integer value) {
+    RoleEnum(String value) {
         this.value = value;
     }
 
-    public static RoleEnum fromValue(Integer value) {
-        return Stream.of(RoleEnum.values())
-                .filter(targetEnum -> targetEnum.value.equals(value))
-                .findFirst().orElse(null);
+    public String getValue() {
+        return value;
     }
 
+    public static RoleEnum fromValue(String value) {
+        return Stream.of(RoleEnum.values())
+                .filter(role -> role.value.equalsIgnoreCase(value))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Invalid role: " + value));
+    }
 }

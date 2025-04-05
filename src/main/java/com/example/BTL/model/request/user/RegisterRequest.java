@@ -30,6 +30,6 @@ public class RegisterRequest {
     @Pattern(regexp = "^\\d{10}$", message = "INVALID_TEL")
     private String tel;
 
-    private String role_id;
+    private String role;
 
 }
