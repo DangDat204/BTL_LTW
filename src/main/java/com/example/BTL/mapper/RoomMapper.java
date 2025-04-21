@@ -6,7 +6,7 @@ import com.example.BTL.model.response.room.RoomCreationResponse;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = {ImageMapper.class})
 public interface RoomMapper {
     @Mapping(target = "user", ignore = true)
     @Mapping(target = "approvalStatus", ignore = true)
@@ -17,5 +17,7 @@ public interface RoomMapper {
     @Mapping(source = "approvalStatus", target = "approvalStatus")
     @Mapping(source = "roomType", target = "roomType")
     @Mapping(source = "status", target = "status")
+    @Mapping(source = "user.tel", target = "landlordTel")
+    @Mapping(source = "user.email", target = "landlordEmail")
     RoomCreationResponse toRoomResponse(Room room);
 }

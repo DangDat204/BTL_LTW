@@ -1,5 +1,6 @@
 package com.example.BTL.model.request.Image;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -9,7 +10,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ImageCreationRequest {
+public class ImageUploadRequest {
+    @NotNull(message = "URL_REQUIRED")
     private String url; // URL của ảnh (hoặc có thể là dữ liệu base64 nếu bạn cho phép upload file)
-    private Boolean isPrimary; // Ảnh chính hay không
+    private Boolean isPrimary = false; // Ảnh chính hay không
 }

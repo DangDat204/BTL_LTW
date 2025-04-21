@@ -1,6 +1,6 @@
 package com.example.BTL.model.response.room;
 
-import com.example.BTL.model.request.Image.ImageCreationRequest;
+import com.example.BTL.model.response.Image.ImageResponse;
 import lombok.*;
 
 import java.util.List;
@@ -21,5 +21,7 @@ public class RoomCreationResponse {
     private String roomType;
     private String status;
     private String amenities;
-
+    private List<ImageResponse> images;
+    private String landlordTel; // Số điện thoại của landlord
+    private String landlordEmail;
 }

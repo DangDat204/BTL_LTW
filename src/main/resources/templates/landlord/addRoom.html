@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Trọ Sinh Viên Giá Rẻ - Thêm Trọ Mới</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <style>
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            background: #f5eeef;
+        }
+
+        .container {
+            flex: 1;
+            /* Đẩy footer xuống dưới */
+        }
+
+        .navbar {
+        background-color: #478d47;
+        }
+
+        .navbar-brand {
+        font-weight: bold;
+        }
+
+        /* Style for the form */
+        .room-form {
+            margin-top: 20px;
+            padding: 30px;
+            background: #fff;
+            border: 2px solid #5e9c76;
+            border-radius: 15px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
+            transition: all 0.3s ease;
+        }
+
+        .room-form:hover {
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        .form-title {
+            text-align: center;
+            font-weight: 700;
+            font-size: 2rem;
+            margin-bottom: 25px;
+            color: #333;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .room-form label {
+            font-weight: 500;
+            color: #444;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .room-form input,
+        .room-form textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            background: #f8f9fa;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .room-form input:focus,
+        .room-form textarea:focus {
+            border-color: #5e9c76;
+            outline: none;
+            box-shadow: 0 0 5px rgba(94, 156, 118, 0.3);
+        }
+
+        /* Grid layout */
+        .row-form {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        /* Đảm bảo nút "Thêm mới" nằm giữa */
+        .submit-btn {
+            grid-column: span 2;
+            text-align: center;
+        }
+
+        .room-form button {
+            background-color: #5e9c76;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        .room-form button:hover {
+            background-color: #478d47;
+            transform: translateY(-2px);
+        }
+
+        footer {
+            padding: 10px 0;
+            font-size: 14px;
+        }
+
+        footer p {
+            margin-bottom: 0px;
+        }
+
+        footer img {
+            width: 20px;
+            margin: 0 3px;
+        }
+    </style>
+</head>
+
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container">
+        <a class="navbar-brand" href="#">
+            <div>
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQT6R25_mY74-zGfMJoxPQnMmy_6PaEqsH-qA&s"
+                     alt="" width="50" height="50">
+                Trọ giá rẻ
+            </div>
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item"><a class="nav-link" href="http://localhost:8080/home/index">Trang chủ</a></li>
+
+                <!--                Landlord-->
+                <li class="nav-item" id="addRoomsLink">
+                    <a class="nav-link" href="#" onclick="navigateToAddRoom()">Thêm phòng trọ</a>
+                </li>
+                <li class="nav-item" id="roomsLink">
+                    <a class="nav-link" href="#" onclick="navigateToManageRooms()">Quản lý phòng</a>
+                </li>
+                <li class="nav-item" id="manageAppointmentsLink">
+                    <a class="nav-link" href="#" onclick="navigateToManageAppointments()">Quản lý lịch hẹn</a>
+                </li>
+            </ul>
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item" id="userGreeting">
+                    <span class="nav-link user-greeting" id="greetingText"></span>
+                </li>
+                <li class="nav-item dropdown" id="userMenu">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        Tài khoản
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                        <li><a class="dropdown-item" href="profile.html" id="profileLink">Hồ sơ</a></li>
+                        <li><a class="dropdown-item" href="#" onclick="logout()">Đăng xuất</a></li>
+                    </ul>
+                </li>
+
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="form-title">Thêm trọ</div>
+            <div class="room-form">
+                <form>
+                    <div class="row-form">
+                        <div class="form-group">
+                            <label for="dia-chi">Địa chỉ</label>
+                            <input type="text" id="dia-chi" name="dia-chi" placeholder="Nhập địa chỉ">
+                        </div>
+                        <div class="form-group">
+                            <label for="sdt">SĐT</label>
+                            <input type="text" id="sdt" name="sdt" placeholder="Nhập số điện thoại">
+                        </div>
+                        <div class="form-group">
+                            <label for="gia-thue">Giá thuê</label>
+                            <input type="text" id="gia-thue" name="gia-thue" placeholder="Nhập giá thuê">
+                        </div>
+                        <div class="form-group">
+                            <label for="dien-tich">Diện tích</label>
+                            <input type="text" id="dien-tich" name="dien-tich" placeholder="Nhập diện tích">
+                        </div>
+                        <div class="form-group">
+                            <label for="mo-ta">Mô tả</label>
+                            <textarea id="mo-ta" name="mo-ta" rows="3" placeholder="Nhập mô tả"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="loai-phong">Loại phòng</label>
+                            <input type="text" id="loai-phong" name="loai-phong" placeholder="Nhập loại phòng">
+                        </div>
+                        <div class="form-group">
+                            <label for="tai-khoan">Tải ảnh lên</label>
+                            <input type="text" id="tai-khoan" name="tai-khoan" placeholder="Nhập tài khoản">
+                        </div>
+                    </div>
+                    <div class="submit-btn">
+                        <button type="submit">Thêm mới</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer class="mt-4 py-4 text-white" style="background-color: #478d47;">
+    <div class="container text-center">
+        <p>© 2025 Trọ Giá Rẻ. All rights reserved.</p>
+        <div>
+            <p>
+                <a href="#" class="text-white mx-2">Chính sách bảo mật</a> |
+                <a href="#" class="text-white mx-2">Điều khoản sử dụng</a> |
+                <a href="#" class="text-white mx-2">Liên hệ</a>
+            </p>
+            <a href="https://www.facebook.com/dangtiendattt"><img src="https://cdn-icons-png.flaticon.com/512/1384/1384053.png" width="30"
+                                                                  alt="Facebook"></a>
+            <a href="#"><img src="https://cdn-icons-png.flaticon.com/512/1384/1384060.png" width="30"
+                             alt="Instagram"></a>
+            <a href="#"><img src="https://cdn-icons-png.flaticon.com/512/733/733635.png" width="30"
+                             alt="Twitter"></a>
+        </div>
+    </div>
+</footer>
+<script>
+    // Hàm giải mã JWT
+    function parseJwt(token) {
+        try {
+            const base64Url = token.split('.')[1];
+            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            const jsonPayload = decodeURIComponent(
+                atob(base64)
+                    .split('')
+                    .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+                    .join('')
+            );
+            return JSON.parse(jsonPayload);
+        } catch (e) {
+            console.error('Error parsing JWT:', e);
+            return null;
+        }
+    }
+    // Hàm đăng xuất
+    function logout() {
+        localStorage.removeItem('jwtToken');
+        window.location.href = '/user/login';
+    }
+    // Kiểm tra vai trò và hiển thị giao diện
+    const token = localStorage.getItem('jwtToken');
+    if (token) {
+        const payload = parseJwt(token);
+        if (payload && payload.authorities && payload.sub) {
+            const userRole = payload.authorities[0].replace('ROLE_', '');
+            const username = payload.sub;
+
+            // Hiển thị Hello + username
+            const greetingText = document.getElementById('greetingText');
+            greetingText.textContent = `Hello ${username}`;
+
+        }
+    }
+</script>
+</body>
+
+</html>

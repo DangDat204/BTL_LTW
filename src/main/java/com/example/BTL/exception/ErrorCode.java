@@ -18,6 +18,8 @@ public enum ErrorCode {
     UNAUTHENTICATED(1006, "UnAuthenticated", HttpStatus.UNAUTHORIZED),
     UNAUTHORIZED(1007, "you do not have permission", HttpStatus.FORBIDDEN),
     INVALID_ROLE(1008, "Invalid role", HttpStatus.BAD_REQUEST),
+
+    ROOM_NOT_FOUND(1005, "Room not found", HttpStatus.NOT_FOUND),
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {

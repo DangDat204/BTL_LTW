@@ -3,6 +3,7 @@ package com.example.BTL.exception;
 import com.example.BTL.model.ApiResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -13,7 +14,7 @@ public class GlobalException {
 
     @ExceptionHandler(value = Exception.class)
 //    day la exception tong quat khi exception khong nhay vao cac loai ta define
-    ResponseEntity<ApiResponse> handlingRuntimeException(RuntimeException exception){
+    ResponseEntity<ApiResponse> handlingRuntimeException(Exception exception){
         log.error("Exception: ", exception);
         ApiResponse apiResponse = new ApiResponse();
 
@@ -36,6 +37,19 @@ public class GlobalException {
 
         return ResponseEntity
                 .status(errorCode.getStatusCode())
+                .body(apiResponse);
+    }
+
+    @ExceptionHandler(value = AuthorizationDeniedException.class)
+    ResponseEntity<ApiResponse> handlingAuthorizationDeniedException(AuthorizationDeniedException exception){
+
+        ApiResponse apiResponse = new ApiResponse();
+
+        apiResponse.setCode(ErrorCode.UNAUTHORIZED.getCode());
+        apiResponse.setMessage(ErrorCode.UNAUTHORIZED.getMessage());
+
+        return ResponseEntity
+                .status(ErrorCode.UNAUTHORIZED.getStatusCode())
                 .body(apiResponse);
     }
 
