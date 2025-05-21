@@ -17,6 +17,7 @@ import com.example.BTL.service.interfaces.RoomService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.*;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -91,14 +92,14 @@ public class RoomServiceImpl implements RoomService {
         // Trả về response
         return roomMapper.toRoomResponse(updatedRoom);
     }
-
+// xoa phong
     @PreAuthorize("hasRole('LANDLORD')")
     @Override
     public void deleteRoom(Long roomId) {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         User landlord = userRepository.findUserByUsername(username)
                 .orElseThrow(()->new AppException(ErrorCode.USER_NOT_EXISTED));
-        Room room = roomRepository.findByIdAnDeleteFalse(roomId)
+        Room room = roomRepository.findByIdAndDeletedFalse(roomId)
                 .orElseThrow(()->new AppException(ErrorCode.ROOM_NOT_FOUND));
         // Kiểm tra quyền: Chỉ landlord sở hữu phòng được xoa
         if (!room.getUser().getId().equals(landlord.getId())) {
@@ -107,18 +108,67 @@ public class RoomServiceImpl implements RoomService {
         room.setDeleted(true);
         roomRepository.save(room);
     }
+// khoi phuc phong
+    @PreAuthorize("hasRole('LANDLORD')")
+    @Override
+    public void restoreRoom(Long roomId){
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        User landlord = userRepository.findUserByUsername(username)
+                .orElseThrow(()->new AppException(ErrorCode.USER_NOT_EXISTED));
+        Room room = roomRepository.findByIdAndDeletedTrue(roomId)
+                .orElseThrow(()->new AppException(ErrorCode.ROOM_NOT_FOUND));
+        // Kiểm tra quyền: Chỉ landlord sở hữu phòng được xoa
+        if (!room.getUser().getId().equals(landlord.getId())) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
+        room.setDeleted(false);
+        roomRepository.save(room);
+    }
+    // Lấy danh sách phòng chua duyet của landlord hiện tại
+    @PreAuthorize("hasRole('LANDLORD')")
+    @Override
+    public Page<RoomCreationResponse> getMyRoomsPending(int pageNumber, int pageSize) {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        User landlord = userRepository.findUserByUsername(username)
+                .orElseThrow(()->new AppException(ErrorCode.USER_NOT_EXISTED));
+        Pageable pageable = PageRequest.of(pageNumber - 1, pageSize);
+
+        Page<Room> roomPage = roomRepository.findByUserIdAndApprovalStatusAndDeletedFalse(landlord.getId(), RoomApprovalStatus.PENDING, pageable);
+        List<RoomCreationResponse> roomResponses = roomPage.getContent().stream()
+                .map(roomMapper::toRoomResponse)
+                .collect(Collectors.toList());
+
+        return new PageImpl<>(roomResponses, pageable, roomPage.getTotalElements());
+    }
+    @PreAuthorize("hasRole('LANDLORD')")
+    @Override
+    public Page<RoomCreationResponse> getMyRoomsApproved(int pageNumber, int pageSize) {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        User landlord = userRepository.findUserByUsername(username)
+                .orElseThrow(()->new AppException(ErrorCode.USER_NOT_EXISTED));
+        Pageable pageable = PageRequest.of(pageNumber - 1, pageSize);
+        Page<Room> roomPage = roomRepository.findByUserIdAndApprovalStatusAndDeletedFalse(landlord.getId(), RoomApprovalStatus.APPROVED, pageable);
+        List<RoomCreationResponse> roomResponses = roomPage.getContent().stream()
+                .map(roomMapper::toRoomResponse)
+                .collect(Collectors.toList());
+
+        return new PageImpl<>(roomResponses, pageable, roomPage.getTotalElements());
+    }
 
     @Override
-    public List<RoomCreationResponse> getAllRooms() {
-        List<Room> rooms = roomRepository.findByApprovalStatusAndDeletedFalse(RoomApprovalStatus.APPROVED);
-        return rooms.stream()
+    public Page<RoomCreationResponse> getAllRooms(int pageNumber, int pageSize) {
+        Pageable pageable = PageRequest.of(pageNumber - 1, pageSize, Sort.by("price").ascending());
+        Page<Room> roomPage = roomRepository.findByApprovalStatusAndDeletedFalse(RoomApprovalStatus.APPROVED, pageable);
+
+        List<RoomCreationResponse> roomResponses = roomPage.getContent().stream()
                 .map(roomMapper::toRoomResponse)
                 .peek(response -> {
-                    // Ẩn thông tin liên hệ trong danh sách
                     response.setLandlordTel(null);
                     response.setLandlordEmail(null);
                 })
                 .collect(Collectors.toList());
+
+        return new PageImpl<>(roomResponses, pageable, roomPage.getTotalElements());
     }
 
     // Lấy chi tiết phòng
@@ -146,5 +196,17 @@ public class RoomServiceImpl implements RoomService {
         return roomMapper.toRoomResponse(updateRoom);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
+    @Override
+    public Page<RoomCreationResponse> getPendingRooms(int pageNumber, int pageSize) {
+        Pageable pageable = PageRequest.of(pageNumber - 1, pageSize); // Lưu ý pageNumber - 1
+        Page<Room> roomPage = roomRepository.findByApprovalStatusAndDeletedFalse(RoomApprovalStatus.PENDING, pageable);
+
+        List<RoomCreationResponse> responses = roomPage.getContent().stream()
+                .map(roomMapper::toRoomResponse)
+                .collect(Collectors.toList());
+
+        return new PageImpl<>(responses, pageable, roomPage.getTotalElements());
+    }
 
 }

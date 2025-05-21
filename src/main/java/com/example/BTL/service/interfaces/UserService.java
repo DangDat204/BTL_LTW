@@ -6,4 +6,5 @@ import com.example.BTL.model.response.user.RegisterResponse;
 public interface UserService {
     RegisterResponse register(RegisterRequest request);
     RegisterResponse getCurrentUser();
+    RegisterResponse getInfoUser(Long id);
 }

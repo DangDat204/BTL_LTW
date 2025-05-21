@@ -20,6 +20,7 @@ public enum ErrorCode {
     INVALID_ROLE(1008, "Invalid role", HttpStatus.BAD_REQUEST),
 
     ROOM_NOT_FOUND(1005, "Room not found", HttpStatus.NOT_FOUND),
+    APPOINTMENT_NOT_FOUND(1005, "Appointment not found", HttpStatus.NOT_FOUND),
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {

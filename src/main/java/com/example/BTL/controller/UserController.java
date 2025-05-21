@@ -41,6 +41,14 @@ public class UserController {
     @ResponseBody
     public ApiResponse<RegisterResponse> getCurrentUser(){
         RegisterResponse response = userService.getCurrentUser();
+        ApiResponse<RegisterResponse> apiResponse = new ApiResponse<>(1000, "Get info current user", response);
+        return  apiResponse;
+    }
+
+    @GetMapping("/getInfoUser/{id}")
+    @ResponseBody
+    public ApiResponse<RegisterResponse> getInfoUser(@PathVariable Long id){
+        RegisterResponse response = userService.getInfoUser(id);
         ApiResponse<RegisterResponse> apiResponse = new ApiResponse<>(1000, "Get info user", response);
         return  apiResponse;
     }

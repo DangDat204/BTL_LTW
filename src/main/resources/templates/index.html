@@ -216,27 +216,33 @@
             <button class="btn btn-success w-100">Lọc kết quả</button>
         </div>
         <div class="col-md-8">
-            <h3 class="text-center">Danh sách phòng trọ</h3>
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="card">
-                        <div class="card-body">
-                            <h5 class="card-title">Phòng trọ Hà Đông</h5>
-                            <p class="card-text">Phòng rộng rãi, thoáng mát.</p>
-                            <a href="#" class="btn btn-success">Xem chi tiết</a>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="card">
-                        <div class="card-body">
-                            <h5 class="card-title">Phòng trọ Cầu Giấy</h5>
-                            <p class="card-text">Gần trường học, tiện nghi đầy đủ.</p>
-                            <a href="#" class="btn btn-success">Xem chi tiết</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <h3 class="text-center mb-4">Danh sách phòng trọ</h3>
+<!--            <div class="row">-->
+<!--                <div class="col-md-6">-->
+<!--                    <div class="card">-->
+<!--                        <div class="card-body">-->
+<!--                            <h5 class="card-title">Phòng trọ Hà Đông</h5>-->
+<!--                            <p class="card-text">Phòng rộng rãi, thoáng mát.</p>-->
+<!--                            <a href="#" class="btn btn-success">Xem chi tiết</a>-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--                <div class="col-md-6">-->
+<!--                    <div class="card">-->
+<!--                        <div class="card-body">-->
+<!--                            <h5 class="card-title">Phòng trọ Cầu Giấy</h5>-->
+<!--                            <p class="card-text">Gần trường học, tiện nghi đầy đủ.</p>-->
+<!--                            <a href="#" class="btn btn-success">Xem chi tiết</a>-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+            <div id="room-container" class="row"></div>
+
+            <!-- Phân trang -->
+            <nav class="mt-4">
+                <ul id="pagination" class="pagination justify-content-center"></ul>
+            </nav>
             <h3 class="mt-4">Tin tức</h3>
             <ul class="list-group">
                 <li class="list-group-item">Những lưu ý khi thuê trọ</li>
@@ -332,10 +338,6 @@
     });
     }
 
-
-
-
-
     // Kiểm tra vai trò và hiển thị giao diện
     const token = localStorage.getItem('jwtToken');
     if (token) {
@@ -380,7 +382,93 @@
         document.getElementById('userMenu').style.display = 'none';
         document.getElementById('userGreeting').style.display = 'none';
     }
+
+
+<!--    -->
+    const apiBaseUrl = "http://localhost:8080/rooms/getAllRooms";
+   // Nhớ phải dạng "Bearer eyJ..."
+
+    let currentPage = 1;
+    const pageSize = 2;
+
+    function fetchRooms(page) {
+  const rawToken = localStorage.getItem("jwtToken");
+
+  if (!rawToken) {
+    alert("Bạn chưa đăng nhập!");
+    return;
+  }
+
+  const token = rawToken.startsWith("Bearer ") ? rawToken : "Bearer " + rawToken;
+
+  fetch(`${apiBaseUrl}?pageNumber=${page}&pageSize=${pageSize}`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": token // ✅ Đã thêm "Bearer "
+    }
+    })
+    .then(res => {
+      if (!res.ok) {
+        throw new Error("Lỗi khi gọi API: " + res.status);
+      }
+      return res.json();
+    })
+    .then(data => {
+      const rooms = data.result.rooms;
+      displayRooms(rooms);
+      setupPagination(data.result.totalPages, data.result.currentPage);
+    })
+    .catch(error => {
+      console.error("Lỗi khi gọi API:", error);
+    });
+    }
+
+
+    function displayRooms(rooms) {
+      const container = document.getElementById("room-container");
+      container.innerHTML = ""; // Xóa cũ
+
+      rooms.forEach(room => {
+        const image = room.images.find(img => img.isPrimary)?.url || "https://via.placeholder.com/300x200";
+        const div = document.createElement("div");
+        div.className = "col-md-6 mb-4";
+
+        div.innerHTML = `
+          <div class="card h-100 shadow-sm">
+            <img src="${image}" class="card-img-top" alt="Ảnh phòng" style="height: 200px; object-fit: cover;">
+            <div class="card-body">
+              <h5 class="card-title">Phòng trọ ${room.address}</h5>
+              <p class="card-text">${room.description}</p>
+              <a href="#" class="btn btn-success">Xem chi tiết</a>
+            </div>
+          </div>
+        `;
+
+        container.appendChild(div);
+      });
+    }
+
+    function setupPagination(totalPages, current) {
+      const pagination = document.getElementById("pagination");
+      pagination.innerHTML = "";
+
+      for (let i = 1; i <= totalPages; i++) {
+        const li = document.createElement("li");
+        li.className = "page-item" + (i === current ? " active" : "");
+        li.innerHTML = `<a class="page-link" href="#">${i}</a>`;
+        li.addEventListener("click", (e) => {
+          e.preventDefault();
+          currentPage = i;
+          fetchRooms(currentPage);
+        });
+        pagination.appendChild(li);
+      }
+    }
+
+    fetchRooms(currentPage);
 </script>
+
 </body>
 
 </html>

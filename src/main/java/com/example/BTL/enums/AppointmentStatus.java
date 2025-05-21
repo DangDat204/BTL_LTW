@@ -5,8 +5,8 @@ import java.util.stream.Stream;
 public enum AppointmentStatus {
     PENDING("pending"),
     CONFIRMED("confirmed"),
-    REJECTED("rejected"),
-    COMPLETED("completed");
+    REJECTED("rejected");
+//    COMPLETED("completed");
 
     private final String value;
 

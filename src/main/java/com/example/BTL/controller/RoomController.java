@@ -9,12 +9,15 @@ import com.example.BTL.service.interfaces.ImageService;
 import com.example.BTL.service.interfaces.RoomService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Page;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/rooms")
@@ -53,21 +56,57 @@ public class RoomController {
         ApiResponse<RoomCreationResponse> apiResponse = new ApiResponse<>(1000, "Room updated successfully", response);
         return apiResponse;
     }
-// Lay danh sach phong, all roles
-    @GetMapping("/getAllRooms")
+    // Xóa phòng (xóa mềm)
+    @DeleteMapping("/deleteRoom/{id}")
+    @PreAuthorize("hasRole('LANDLORD')")
     @ResponseBody
-    public ApiResponse<List<RoomCreationResponse>> getAllRooms() {
-        List<RoomCreationResponse> rooms = roomService.getAllRooms();
-        ApiResponse<List<RoomCreationResponse>> apiResponse = new ApiResponse<>(1000, "All rooms", rooms);
+    public ApiResponse<Void> deleteRoom(@PathVariable Long id) {
+        roomService.deleteRoom(id);
+        ApiResponse<Void> apiResponse = new ApiResponse<>(1000, "Room deleted successfully", null);
+        return apiResponse;
+    }
+//    khoi phuc phong
+    @PatchMapping("/restoreRoom/{id}")
+    @PreAuthorize("hasRole('LANDLORD')")
+    @ResponseBody
+    public ApiResponse<Void> restoreRoom(@PathVariable Long id){
+        roomService.restoreRoom(id);
+        ApiResponse<Void> apiResponse = new ApiResponse<>(1000, "Room restored successfully", null);
         return apiResponse;
     }
 
-    // Lấy chi tiết phòng, all roles
-    @GetMapping("/{id}")
+    // Lấy danh sách phòng cua landlord chưa được duyệt
+    @GetMapping("/MyRoomsPending")
+    @PreAuthorize("hasRole('LANDLORD')")
     @ResponseBody
-    public ApiResponse<RoomCreationResponse> getRoomById(@PathVariable Long id) {
-        RoomCreationResponse response = roomService.getRoomById(id);
-        ApiResponse<RoomCreationResponse> apiResponse = new ApiResponse<>(1000, "Get room by Id", response);
+    public ApiResponse<Map<String, Object>> getMyRoomsPending(@RequestParam(defaultValue = "1") int pageNumber,
+                                                              @RequestParam(defaultValue = "5") int pageSize) {
+        Page<RoomCreationResponse> roomPage = roomService.getMyRoomsPending(pageNumber, pageSize);
+
+        Map<String, Object> response = new LinkedHashMap<>();
+        response.put("My Pending Rooms", roomPage.getContent());
+        response.put("currentPage", roomPage.getNumber() + 1);
+        response.put("totalItems", roomPage.getTotalElements());
+        response.put("totalPages", roomPage.getTotalPages());
+
+        ApiResponse<Map<String, Object>> apiResponse = new ApiResponse<>(1000, "My room is on pending", response);
+        return apiResponse;
+    }
+    // Lấy danh sách phòng cua landlord da được duyệt
+    @GetMapping("/MyRoomsApproved")
+    @PreAuthorize("hasRole('LANDLORD')")
+    @ResponseBody
+    public ApiResponse<Map<String, Object>> getMyRoomsApproved(@RequestParam(defaultValue = "1") int pageNumber,
+                                                              @RequestParam(defaultValue = "5") int pageSize) {
+        Page<RoomCreationResponse> roomPage = roomService.getMyRoomsApproved(pageNumber, pageSize);
+
+        Map<String, Object> response = new LinkedHashMap<>();
+        response.put("My Approved Rooms", roomPage.getContent());
+        response.put("currentPage", roomPage.getNumber() + 1);
+        response.put("totalItems", roomPage.getTotalElements());
+        response.put("totalPages", roomPage.getTotalPages());
+
+        ApiResponse<Map<String, Object>> apiResponse = new ApiResponse<>(1000, "My room is approved", response);
         return apiResponse;
     }
 
@@ -84,7 +123,31 @@ public class RoomController {
                 .build();
     }
 
+    // Lay danh sach phong, all roles
+    @GetMapping("/getAllRooms")
+    @ResponseBody
+    public ApiResponse<Map<String, Object>> getAllRooms(@RequestParam(defaultValue = "1") int pageNumber,
+                                                        @RequestParam(defaultValue = "5") int pageSize) {
+//        List<RoomCreationResponse> rooms = roomService.getAllRooms();
+        Page<RoomCreationResponse> roomPage = roomService.getAllRooms(pageNumber, pageSize);
 
+        Map<String, Object> response = new LinkedHashMap<>();
+        response.put("rooms", roomPage.getContent());
+        response.put("currentPage", roomPage.getNumber() + 1);
+        response.put("totalItems", roomPage.getTotalElements());
+        response.put("totalPages", roomPage.getTotalPages());
 
+        ApiResponse<Map<String, Object>> apiResponse = new ApiResponse<>(1000, "All Paged rooms", response);
+        return apiResponse;
+    }
+
+    // Lấy chi tiết phòng, all roles
+    @GetMapping("/{id}")
+    @ResponseBody
+    public ApiResponse<RoomCreationResponse> getRoomById(@PathVariable Long id) {
+        RoomCreationResponse response = roomService.getRoomById(id);
+        ApiResponse<RoomCreationResponse> apiResponse = new ApiResponse<>(1000, "Get room by Id", response);
+        return apiResponse;
+    }
 
 }
