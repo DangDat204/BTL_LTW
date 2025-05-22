@@ -191,52 +191,47 @@
     <div class="row">
         <div class="col-md-4 filter-section">
             <h5>Bộ lọc</h5>
-            <select class="form-select mb-3">
+            <select id="priceFilter" class="form-select mb-3">
                 <option selected>Giá (triệu/tháng)</option>
-                <option value="1">Dưới 1 triệu</option>
-                <option value="2">1 - 3 triệu</option>
+                <option value="1">Dưới 2 triệu</option>
+                <option value="2">2 - 3 triệu</option>
                 <option value="3">Trên 3 triệu</option>
             </select>
-            <select class="form-select mb-3">
-                <option selected>Địa chỉ</option>
-                <option value="1">Hà Đông</option>
-                <option value="2">Cầu Giấy</option>
+<!--            Cầu Giấy, Thanh Xuân, Hoàng Mai, Đống Đa, Hà Đông, Hai Bà Trưng, Ba Đình, Hoàn Kiếm, Long Biên, Tây Hồ, Nam Từ Liêm và Bắc Từ Liêm-->
+            <select id="addressFilter" class="form-select mb-3">
+                <option value="">Chọn địa chỉ</option>
+                <option value="Cầu Giấy">Cầu Giấy</option>
+                <option value="Thanh Xuân">Thanh Xuân</option>
+                <option value="Hoàng Mai">Hoàng Mai</option>
+                <option value="Đống Đa">Đống Đa</option>
+                <option value="Hà Đông">Hà Đông</option>
+                <option value="Hai Bà Trưng">Hai Bà Trưng</option>
+                <option value="Ba Đình">Ba Đình</option>
+                <option value="Hoàn Kiếm">Hoàn Kiếm</option>
+                <option value="Long Biên">Long Biên</option>
+                <option value="Tây Hồ">Tây Hồ</option>
+                <option value="Nam Từ Liêm">Nam Từ Liêm</option>
+                <option value="Bắc Từ Liêm">Bắc Từ Liêm</option>
             </select>
-            <select class="form-select mb-3">
+            <select id="areaFilter" class="form-select mb-3">
                 <option selected>Diện tích (m²)</option>
                 <option value="1">Dưới 20m²</option>
-                <option value="2">20 - 40m²</option>
-                <option value="3">Trên 40m²</option>
+                <option value="2">20 - 30m²</option>
+                <option value="3">30 - 40m²</option>
+                <option value="4">Trên 40m²</option>
             </select>
-            <select class="form-select mb-3">
+            <select id="typeFilter" class="form-select mb-3">
                 <option selected>Kiểu phòng</option>
-                <option value="1">Phòng đơn</option>
-                <option value="2">Phòng đôi</option>
+                <option value="1">Phòng Studio</option>
+                <option value="2">Phòng căn hộ</option>
+                <option value="3">Phòng đôi</option>
             </select>
-            <button class="btn btn-success w-100">Lọc kết quả</button>
+            <button id="filterButton" class="btn btn-success w-100">Lọc kết quả</button>
+            <button id="resetButton" class="btn btn-secondary w-100 mt-2">Xóa bộ lọc</button>
+
         </div>
         <div class="col-md-8">
             <h3 class="text-center mb-4">Danh sách phòng trọ</h3>
-<!--            <div class="row">-->
-<!--                <div class="col-md-6">-->
-<!--                    <div class="card">-->
-<!--                        <div class="card-body">-->
-<!--                            <h5 class="card-title">Phòng trọ Hà Đông</h5>-->
-<!--                            <p class="card-text">Phòng rộng rãi, thoáng mát.</p>-->
-<!--                            <a href="#" class="btn btn-success">Xem chi tiết</a>-->
-<!--                        </div>-->
-<!--                    </div>-->
-<!--                </div>-->
-<!--                <div class="col-md-6">-->
-<!--                    <div class="card">-->
-<!--                        <div class="card-body">-->
-<!--                            <h5 class="card-title">Phòng trọ Cầu Giấy</h5>-->
-<!--                            <p class="card-text">Gần trường học, tiện nghi đầy đủ.</p>-->
-<!--                            <a href="#" class="btn btn-success">Xem chi tiết</a>-->
-<!--                        </div>-->
-<!--                    </div>-->
-<!--                </div>-->
-<!--            </div>-->
             <div id="room-container" class="row"></div>
 
             <!-- Phân trang -->
@@ -294,10 +289,6 @@
         localStorage.removeItem('jwtToken');
         window.location.href = '/user/login';
     }
-
-
-
-
 
 
     // Hàm điều hướng cho từng chức năng của LANDLORD
@@ -383,90 +374,163 @@
         document.getElementById('userGreeting').style.display = 'none';
     }
 
+<!--all phong va loc phong-->
+        const pageSize = 4;
+        let currentPage = 1;
+        let isFiltering = false;
+        let currentFilterParams = "";
 
-<!--    -->
-    const apiBaseUrl = "http://localhost:8080/rooms/getAllRooms";
-   // Nhớ phải dạng "Bearer eyJ..."
+        const apiBaseUrl = {
+          getAll: "http://localhost:8080/rooms/getAllRooms",
+          filter: "http://localhost:8080/rooms/filterRooms"
+        };
 
-    let currentPage = 1;
-    const pageSize = 2;
+        function fetchRooms(page) {
+          const rawToken = localStorage.getItem("jwtToken");
+          if (!rawToken) {
+            alert("Bạn chưa đăng nhập!");
+            return;
+          }
 
-    function fetchRooms(page) {
-  const rawToken = localStorage.getItem("jwtToken");
+          const token = rawToken.startsWith("Bearer ") ? rawToken : "Bearer " + rawToken;
 
-  if (!rawToken) {
-    alert("Bạn chưa đăng nhập!");
-    return;
-  }
+          const url = isFiltering
+            ? `${apiBaseUrl.filter}${currentFilterParams}&pageNumber=${page}&pageSize=${pageSize}`
+            : `${apiBaseUrl.getAll}?pageNumber=${page}&pageSize=${pageSize}`;
 
-  const token = rawToken.startsWith("Bearer ") ? rawToken : "Bearer " + rawToken;
+          fetch(url, {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": token
+            }
+          })
+            .then(res => {
+              if (!res.ok) throw new Error("Lỗi khi gọi API");
+              return res.json();
+            })
+            .then(data => {
+              const rooms = isFiltering ? data.result.FilterRooms : data.result.rooms;
+              displayRooms(rooms);
+              setupPagination(data.result.totalPages, data.result.currentPage);
+            })
+            .catch(error => {
+              console.error("Lỗi khi fetchRooms:", error);
+            });
+        }
 
-  fetch(`${apiBaseUrl}?pageNumber=${page}&pageSize=${pageSize}`, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": token // ✅ Đã thêm "Bearer "
-    }
-    })
-    .then(res => {
-      if (!res.ok) {
-        throw new Error("Lỗi khi gọi API: " + res.status);
-      }
-      return res.json();
-    })
-    .then(data => {
-      const rooms = data.result.rooms;
-      displayRooms(rooms);
-      setupPagination(data.result.totalPages, data.result.currentPage);
-    })
-    .catch(error => {
-      console.error("Lỗi khi gọi API:", error);
-    });
-    }
+        function displayRooms(rooms) {
+          const container = document.getElementById("room-container");
+          container.innerHTML = "";
 
+          if (!rooms || rooms.length === 0) {
+            container.innerHTML = "<p class='text-danger'>Không có phòng nào phù hợp!</p>";
+            return;
+          }
 
-    function displayRooms(rooms) {
-      const container = document.getElementById("room-container");
-      container.innerHTML = ""; // Xóa cũ
+          rooms.forEach(room => {
+            const image = room.images[0]?.url || "https://via.placeholder.com/300x200";
+            const div = document.createElement("div");
+            div.className = "col-md-6 mb-4";
 
-      rooms.forEach(room => {
-        const image = room.images.find(img => img.isPrimary)?.url || "https://via.placeholder.com/300x200";
-        const div = document.createElement("div");
-        div.className = "col-md-6 mb-4";
+            div.innerHTML = `
+              <div class="card h-100 shadow-sm">
+                <img src="${image}" class="card-img-top" alt="Ảnh phòng" style="height: 200px; object-fit: cover;">
+                <div class="card-body">
+                  <h5 class="card-title">Địa chỉ phòng trọ: ${room.address}</h5>
+                  <p class="card-text">ID phòng: ${room.id}</p>
+                  <p class="card-text">Mô tả: ${room.description}</p>
+                  <p class="card-text">Loại phòng: ${room.roomType}</p>
+                  <a href="#" class="btn btn-success">Xem chi tiết</a>
+                </div>
+              </div>
+            `;
+            container.appendChild(div);
+          });
+        }
 
-        div.innerHTML = `
-          <div class="card h-100 shadow-sm">
-            <img src="${image}" class="card-img-top" alt="Ảnh phòng" style="height: 200px; object-fit: cover;">
-            <div class="card-body">
-              <h5 class="card-title">Phòng trọ ${room.address}</h5>
-              <p class="card-text">${room.description}</p>
-              <a href="#" class="btn btn-success">Xem chi tiết</a>
-            </div>
-          </div>
-        `;
+        function setupPagination(totalPages, current) {
+          const pagination = document.getElementById("pagination");
+          pagination.innerHTML = "";
 
-        container.appendChild(div);
-      });
-    }
+          for (let i = 1; i <= totalPages; i++) {
+            const li = document.createElement("li");
+            li.className = "page-item" + (i === current ? " active" : "");
+            li.innerHTML = `<a class="page-link" href="#">${i}</a>`;
+            li.addEventListener("click", (e) => {
+              e.preventDefault();
+              currentPage = i;
+              fetchRooms(currentPage);
+            });
+            pagination.appendChild(li);
+          }
+        }
 
-    function setupPagination(totalPages, current) {
-      const pagination = document.getElementById("pagination");
-      pagination.innerHTML = "";
+        // ✅ Lọc phòng
+        document.getElementById("filterButton").addEventListener("click", () => {
+          const rawToken = localStorage.getItem("jwtToken");
+          if (!rawToken) {
+            alert("Bạn chưa đăng nhập!");
+            return;
+          }
 
-      for (let i = 1; i <= totalPages; i++) {
-        const li = document.createElement("li");
-        li.className = "page-item" + (i === current ? " active" : "");
-        li.innerHTML = `<a class="page-link" href="#">${i}</a>`;
-        li.addEventListener("click", (e) => {
-          e.preventDefault();
-          currentPage = i;
+          // Lấy giá trị từ form lọc
+          const priceValue = document.getElementById("priceFilter").value;
+          const areaValue = document.getElementById("areaFilter").value;
+          const typeValue = document.getElementById("typeFilter").value;
+          const addressValue = document.getElementById("addressFilter").value.trim();
+
+          // Xử lý khoảng giá
+          let minPrice = "", maxPrice = "";
+          if (priceValue === "1") maxPrice = 2;
+          else if (priceValue === "2") { minPrice = 2; maxPrice = 3; }
+          else if (priceValue === "3") minPrice = 3;
+
+          // Xử lý diện tích
+          let minArea = "", maxArea = "";
+          if (areaValue === "1") maxArea = 20;
+          else if (areaValue === "2") { minArea = 20; maxArea = 30; }
+          else if (areaValue === "3") { minArea = 30; maxArea = 40; }
+          else if (areaValue === "4") minArea = 40;
+
+          // Loại phòng
+          const roomType = typeValue === "1" ? "STUDIO"
+                        : typeValue === "2" ? "APARTMENT"
+                        : typeValue === "3" ? "SHARED"
+                        : "";
+
+          // Kiểm tra address: bỏ qua nếu là "-- Chọn địa chỉ --" hoặc rỗng
+          const address = (addressValue && addressValue !== "-- Chọn địa chỉ --") ? addressValue : "";
+
+          // Tạo query string
+          currentFilterParams =
+            `?minPrice=${minPrice}&maxPrice=${maxPrice}` +
+            `&minArea=${minArea}&maxArea=${maxArea}` +
+            `&address=${encodeURIComponent(address)}` +
+            `&roomType=${roomType}`;
+
+          isFiltering = true;
+          currentPage = 1;
           fetchRooms(currentPage);
         });
-        pagination.appendChild(li);
-      }
-    }
 
-    fetchRooms(currentPage);
+        // ✅ Reset bộ lọc
+        document.getElementById("resetButton").addEventListener("click", () => {
+          document.getElementById("priceFilter").selectedIndex = 0;
+          document.getElementById("addressFilter").selectedIndex = 0;
+          document.getElementById("areaFilter").selectedIndex = 0;
+          document.getElementById("typeFilter").selectedIndex = 0;
+
+          isFiltering = false;
+          currentFilterParams = "";
+          currentPage = 1;
+          fetchRooms(currentPage);
+        });
+
+        // ✅ Load mặc định khi mở trang
+        fetchRooms(currentPage);
+
+
 </script>
 
 </body>

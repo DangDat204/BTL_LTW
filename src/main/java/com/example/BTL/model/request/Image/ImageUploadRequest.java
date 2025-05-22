@@ -13,5 +13,4 @@ import lombok.NoArgsConstructor;
 public class ImageUploadRequest {
     @NotNull(message = "URL_REQUIRED")
     private String url; // URL của ảnh (hoặc có thể là dữ liệu base64 nếu bạn cho phép upload file)
-    private Boolean isPrimary = false; // Ảnh chính hay không
 }

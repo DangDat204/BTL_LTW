@@ -6,7 +6,7 @@ import com.example.BTL.model.response.room.RoomCreationResponse;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-@Mapper(componentModel = "spring", uses = {ImageMapper.class})
+@Mapper(componentModel = "spring")
 public interface RoomMapper {
     @Mapping(target = "user", ignore = true)
     @Mapping(target = "approvalStatus", ignore = true)

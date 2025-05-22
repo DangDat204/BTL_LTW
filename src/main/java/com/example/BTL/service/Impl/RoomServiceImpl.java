@@ -180,8 +180,23 @@ public class RoomServiceImpl implements RoomService {
         // Trả về đầy đủ thông tin, bao gồm thông tin liên hệ
         return roomMapper.toRoomResponse(room);
     }
+// filterRoom
+    @Override
+    public Page<RoomCreationResponse> filterRooms(Double minPrice, Double maxPrice,
+                                  Double minArea, Double maxArea,
+                                  String address, RoomType roomType, int pageNumber, int pageSize){
+        Pageable pageable = PageRequest.of(pageNumber - 1, pageSize, Sort.by("price").ascending());
+        Page<Room> roomPage = roomRepository.filterRooms(minPrice, maxPrice, minArea, maxArea, address, roomType, pageable);
+        List<RoomCreationResponse> roomResponses = roomPage.getContent().stream()
+                .map(roomMapper::toRoomResponse)
+                .peek(response -> {
+                    response.setLandlordTel(null);
+                    response.setLandlordEmail(null);
+                })
+                .collect(Collectors.toList());
 
-
+        return new PageImpl<>(roomResponses, pageable, roomPage.getTotalElements());
+    }
 
     @Transactional
     @PreAuthorize("hasRole('ADMIN')")

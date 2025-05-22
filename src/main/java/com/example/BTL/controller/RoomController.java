@@ -1,5 +1,6 @@
 package com.example.BTL.controller;
 
+import com.example.BTL.enums.RoomType;
 import com.example.BTL.model.ApiResponse;
 import com.example.BTL.model.request.Image.ImageUploadRequest;
 import com.example.BTL.model.request.room.RoomCreationRequest;
@@ -13,8 +14,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -109,14 +110,14 @@ public class RoomController {
         ApiResponse<Map<String, Object>> apiResponse = new ApiResponse<>(1000, "My room is approved", response);
         return apiResponse;
     }
-
-    @PostMapping("/{id}/images")
+// upload anh cho phong
+    @PostMapping("/{roomId}/images")
     @PreAuthorize("hasRole('LANDLORD')")
     @ResponseBody
     public ApiResponse<List<ImageResponse>> uploadImages(
-            @PathVariable Long id,
-            @Valid @RequestBody List<ImageUploadRequest> requests) {
-        List<ImageResponse> responses = imageService.uploadImages(id, requests);
+            @PathVariable Long roomId,
+            @RequestParam("images") MultipartFile[] images) {
+        List<ImageResponse> responses = imageService.uploadRoomImages(roomId, images);
         return ApiResponse.<List<ImageResponse>>builder()
                 .result(responses)
                 .message("Images uploaded successfully")
@@ -148,6 +149,32 @@ public class RoomController {
         RoomCreationResponse response = roomService.getRoomById(id);
         ApiResponse<RoomCreationResponse> apiResponse = new ApiResponse<>(1000, "Get room by Id", response);
         return apiResponse;
+    }
+
+//    loc phong (filterRooms) all Roles
+    @GetMapping("/filterRooms")
+    @ResponseBody
+    public ApiResponse<Map<String, Object>> filterRooms(
+            @RequestParam(required = false) Double minPrice,
+            @RequestParam(required = false) Double maxPrice,
+            @RequestParam(required = false) Double minArea,
+            @RequestParam(required = false) Double maxArea,
+            @RequestParam(required = false) String address,
+            @RequestParam(required = false) RoomType roomType,
+            @RequestParam(defaultValue = "1") int pageNumber,
+            @RequestParam(defaultValue = "5") int pageSize
+    ) {
+        Page<RoomCreationResponse> roomPage = roomService.filterRooms(minPrice, maxPrice, minArea, maxArea, address, roomType, pageNumber, pageSize);
+
+        Map<String, Object> response = new LinkedHashMap<>();
+        response.put("FilterRooms", roomPage.getContent());
+        response.put("currentPage", roomPage.getNumber() + 1);
+        response.put("totalItems", roomPage.getTotalElements());
+        response.put("totalPages", roomPage.getTotalPages());
+
+        ApiResponse<Map<String, Object>> apiResponse = new ApiResponse<>(1000, "All Paged FilterRooms", response);
+        return apiResponse;
+
     }
 
 }
