@@ -13,4 +13,5 @@ public interface AppointmentService {
 //    landlord
     AppointmentResponse approveAppointment(Long appointmentId, AppointmentApprovalRequest request);
     Page<AppointmentResponse> getPendingAppointmentsForLandlord(int pageNumber, int pageSize);
+    Page<AppointmentResponse> getConfirmedAppointmentsForLandlord(int pageNumber, int pageSize);
 }

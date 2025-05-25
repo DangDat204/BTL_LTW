@@ -23,13 +23,7 @@
             /* Đẩy footer xuống dưới */
         }
 
-        .navbar {
-        background-color: #478d47;
-        }
 
-        .navbar-brand {
-        font-weight: bold;
-        }
 
         /* Style for the form */
         .room-form {
@@ -117,171 +111,148 @@
             background-color: #478d47;
             transform: translateY(-2px);
         }
-
-        footer {
-            padding: 10px 0;
-            font-size: 14px;
-        }
-
-        footer p {
-            margin-bottom: 0px;
-        }
-
-        footer img {
-            width: 20px;
-            margin: 0 3px;
-        }
     </style>
 </head>
 
 <body>
-<nav class="navbar navbar-expand-lg navbar-dark">
-    <div class="container">
-        <a class="navbar-brand" href="#">
-            <div>
-                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQT6R25_mY74-zGfMJoxPQnMmy_6PaEqsH-qA&s"
-                     alt="" width="50" height="50">
-                Trọ giá rẻ
-            </div>
-        </a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav me-auto">
-                <li class="nav-item"><a class="nav-link" href="http://localhost:8080/home/index">Trang chủ</a></li>
+    <div id="navbar-placeholder"></div>
 
-                <!--                Landlord-->
-                <li class="nav-item" id="addRoomsLink">
-                    <a class="nav-link" href="#" onclick="navigateToAddRoom()">Thêm phòng trọ</a>
-                </li>
-                <li class="nav-item" id="roomsLink">
-                    <a class="nav-link" href="#" onclick="navigateToManageRooms()">Quản lý phòng</a>
-                </li>
-                <li class="nav-item" id="manageAppointmentsLink">
-                    <a class="nav-link" href="#" onclick="navigateToManageAppointments()">Quản lý lịch hẹn</a>
-                </li>
-            </ul>
-            <ul class="navbar-nav ms-auto">
-                <li class="nav-item" id="userGreeting">
-                    <span class="nav-link user-greeting" id="greetingText"></span>
-                </li>
-                <li class="nav-item dropdown" id="userMenu">
-                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        Tài khoản
-                    </a>
-                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                        <li><a class="dropdown-item" href="profile.html" id="profileLink">Hồ sơ</a></li>
-                        <li><a class="dropdown-item" href="#" onclick="logout()">Đăng xuất</a></li>
-                    </ul>
-                </li>
-
-            </ul>
-        </div>
-    </div>
-</nav>
-
-<div class="container mt-4">
-    <div class="row">
-        <div class="col-md-12">
-            <div class="form-title">Thêm trọ</div>
-            <div class="room-form">
-                <form>
-                    <div class="row-form">
-                        <div class="form-group">
-                            <label for="dia-chi">Địa chỉ</label>
-                            <input type="text" id="dia-chi" name="dia-chi" placeholder="Nhập địa chỉ">
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="form-title">Thêm trọ</div>
+                <div class="room-form">
+                    <form>
+                        <div class="row-form">
+                            <div class="form-group">
+                                <label for="address">Địa chỉ</label>
+                                <select id="address" name="address" class="form-control" required>
+                                    <option value="Cầu Giấy">Cầu Giấy</option>
+                                    <option value="Thanh Xuân">Thanh Xuân</option>
+                                    <option value="Hoàng Mai">Hoàng Mai</option>
+                                    <option value="Đống Đa">Đống Đa</option>
+                                    <option value="Hà Đông">Hà Đông</option>
+                                    <option value="Hai Bà Trưng">Hai Bà Trưng</option>
+                                    <option value="Ba Đình">Ba Đình</option>
+                                    <option value="Hoàn Kiếm">Hoàn Kiếm</option>
+                                    <option value="Long Biên">Long Biên</option>
+                                    <option value="Tây Hồ">Tây Hồ</option>
+                                    <option value="Nam Từ Liêm">Nam Từ Liêm</option>
+                                    <option value="Bắc Từ Liêm">Bắc Từ Liêm</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="area">Diện tích (m²)</label>
+                                <input type="number" id="area" name="area" placeholder="Nhập diện tích" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="capacity">Sức chứa (người)</label>
+                                <input type="number" id="capacity" name="capacity" placeholder="Nhập sức chứa" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="price">Giá thuê (triệu/tháng)</label>
+                                <input type="number" step="0.1" id="price" name="price" placeholder="Nhập giá thuê"
+                                    required>
+                            </div>
+                            <div class="form-group">
+                                <label for="roomType">Loại phòng</label>
+                                <select id="roomType" name="roomType" class="form-control" required>
+                                    <option value="">Chọn loại phòng</option>
+                                    <option value="SHARED">Phòng chung</option>
+                                    <option value="APARTMENT">Phòng căn hộ</option>
+                                    <option value="STUDIO">Phòng Studio</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="amenities">Tiện nghi</label>
+                                <input type="text" id="amenities" name="amenities"
+                                    placeholder="Ví dụ: điều hòa, nóng lạnh...">
+                            </div>
+                            <div class="form-group">
+                                <label for="description">Mô tả</label>
+                                <textarea id="description" name="description" rows="3"
+                                    placeholder="Nhập mô tả chi tiết về phòng" required></textarea>
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label for="sdt">SĐT</label>
-                            <input type="text" id="sdt" name="sdt" placeholder="Nhập số điện thoại">
+                        <div class="submit-btn">
+                            <button type="submit">Thêm mới</button>
                         </div>
-                        <div class="form-group">
-                            <label for="gia-thue">Giá thuê</label>
-                            <input type="text" id="gia-thue" name="gia-thue" placeholder="Nhập giá thuê">
-                        </div>
-                        <div class="form-group">
-                            <label for="dien-tich">Diện tích</label>
-                            <input type="text" id="dien-tich" name="dien-tich" placeholder="Nhập diện tích">
-                        </div>
-                        <div class="form-group">
-                            <label for="mo-ta">Mô tả</label>
-                            <textarea id="mo-ta" name="mo-ta" rows="3" placeholder="Nhập mô tả"></textarea>
-                        </div>
-                        <div class="form-group">
-                            <label for="loai-phong">Loại phòng</label>
-                            <input type="text" id="loai-phong" name="loai-phong" placeholder="Nhập loại phòng">
-                        </div>
-                        <div class="form-group">
-                            <label for="tai-khoan">Tải ảnh lên</label>
-                            <input type="text" id="tai-khoan" name="tai-khoan" placeholder="Nhập tài khoản">
-                        </div>
-                    </div>
-                    <div class="submit-btn">
-                        <button type="submit">Thêm mới</button>
-                    </div>
-                </form>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<footer class="mt-4 py-4 text-white" style="background-color: #478d47;">
-    <div class="container text-center">
-        <p>© 2025 Trọ Giá Rẻ. All rights reserved.</p>
-        <div>
-            <p>
-                <a href="#" class="text-white mx-2">Chính sách bảo mật</a> |
-                <a href="#" class="text-white mx-2">Điều khoản sử dụng</a> |
-                <a href="#" class="text-white mx-2">Liên hệ</a>
-            </p>
-            <a href="https://www.facebook.com/dangtiendattt"><img src="https://cdn-icons-png.flaticon.com/512/1384/1384053.png" width="30"
-                                                                  alt="Facebook"></a>
-            <a href="#"><img src="https://cdn-icons-png.flaticon.com/512/1384/1384060.png" width="30"
-                             alt="Instagram"></a>
-            <a href="#"><img src="https://cdn-icons-png.flaticon.com/512/733/733635.png" width="30"
-                             alt="Twitter"></a>
-        </div>
-    </div>
-</footer>
-<script>
-    // Hàm giải mã JWT
-    function parseJwt(token) {
-        try {
-            const base64Url = token.split('.')[1];
-            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-            const jsonPayload = decodeURIComponent(
-                atob(base64)
-                    .split('')
-                    .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
-                    .join('')
-            );
-            return JSON.parse(jsonPayload);
-        } catch (e) {
-            console.error('Error parsing JWT:', e);
-            return null;
-        }
-    }
-    // Hàm đăng xuất
-    function logout() {
-        localStorage.removeItem('jwtToken');
-        window.location.href = '/user/login';
-    }
-    // Kiểm tra vai trò và hiển thị giao diện
-    const token = localStorage.getItem('jwtToken');
-    if (token) {
-        const payload = parseJwt(token);
-        if (payload && payload.authorities && payload.sub) {
-            const userRole = payload.authorities[0].replace('ROLE_', '');
-            const username = payload.sub;
+    <div id="footer-placeholder"></div>
 
-            // Hiển thị Hello + username
-            const greetingText = document.getElementById('greetingText');
-            greetingText.textContent = `Hello ${username}`;
+    <script>
+        // Nhúng navbar
+        fetch('/navbar.html')
+            .then(res => res.text())
+            .then(data => {
+                document.getElementById('navbar-placeholder').innerHTML = data;
+                if (window.handleNavbarRole) window.handleNavbarRole();
+            });
+        // Nhúng footer
+        fetch('/footer.html')
+            .then(res => res.text())
+            .then(data => {
+                document.getElementById('footer-placeholder').innerHTML = data;
+            });
 
-        }
-    }
-</script>
+
+        document.querySelector('form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const token = localStorage.getItem('jwtToken');
+            if (!token) {
+                alert('Bạn chưa đăng nhập!');
+                window.location.href = '/login.html';
+                return;
+            }
+
+            // Lấy dữ liệu từ form
+            const data = {
+                address: document.getElementById('address').value,
+                area: document.getElementById('area').value,
+                capacity: document.getElementById('capacity').value,
+                description: document.getElementById('description').value,
+                price: document.getElementById('price').value,
+                roomType: document.getElementById('roomType').value,
+                amenities: document.getElementById('amenities').value
+            };
+
+            try {
+                // Gửi API tạo phòng
+                const res = await fetch('/rooms/create_room', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await res.json();
+                console.log('Response from server:', result); // Thêm log để debug
+                
+                // Kiểm tra cả result và result.result
+                if (result && result.result) {
+                    alert('Tạo phòng thành công! Bây giờ hãy upload ảnh.');
+                    // Lưu roomId để upload ảnh
+                    window.createdRoomId = result.result.id;
+                    // Hiện nút upload ảnh
+                    document.getElementById('upload-btn').style.display = 'inline-block';
+                } else {
+                    alert('Tạo phòng thất bại: ' + (result.message || 'Lỗi không xác định'));
+                }
+            } catch (error) {
+                console.error('Error:', error); // Thêm log để debug
+                alert('Có lỗi xảy ra: ' + error.message);
+            }
+        });
+    </script>
+    <script src="/js/common.js"></script>
 </body>
 
 </html>

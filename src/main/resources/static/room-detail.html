@@ -1,0 +1,85 @@
+<!-- room-detail.html -->
+<link rel="stylesheet" href="/room-detail.css">
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="room-title">Xem chi tiết phòng trọ</div>
+            <div class="room-detail">
+                <div id="carouselExampleDark" class="carousel carousel-dark slide" data-bs-ride="carousel" style="margin-bottom: 20px;">
+                    <div class="carousel-indicators">
+                        {{carouselIndicators}}
+                    </div>
+                    <div class="carousel-inner">
+                        {{carouselItems}}
+                    </div>
+                    <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleDark" data-bs-slide="prev">
+                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Previous</span>
+                    </button>
+                    <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleDark" data-bs-slide="next">
+                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Next</span>
+                    </button>
+                </div>
+                <div class="detail-item">
+                    <label>ID phòng:</label>
+                    <span id="roomIdSpan">{{id}}</span>
+                </div>
+                <div class="detail-item">
+                    <label>Địa chỉ:</label>
+                    <span>{{address}}</span>
+                </div>
+                <div class="detail-item">
+                    <label>Diện tích:</label>
+                    <span>{{area}} m²</span>
+                </div>
+                <div class="detail-item">
+                    <label>Sức chứa:</label>
+                    <span>{{capacity}} người</span>
+                </div>
+                <div class="detail-item">
+                    <label>Mô tả:</label>
+                    <span>{{description}}</span>
+                </div>
+                <div class="detail-item">
+                    <label>Giá:</label>
+                    <span>{{price}} triệu/tháng</span>
+                </div>
+                <div class="detail-item">
+                    <label>Loại phòng:</label>
+                    <span>{{roomType}}</span>
+                </div>
+                <div class="detail-item">
+                    <label>Tiện nghi:</label>
+                    <span>{{amenities}}</span>
+                </div>
+                <div class="detail-item">
+                    <label>Số điện thoại chủ trọ:</label>
+                    <span>{{landlordTel}}</span>
+                </div>
+                <div class="detail-item">
+                    <label>Email chủ trọ:</label>
+                    <span>{{landlordEmail}}</span>
+                </div>
+                <button class="btn-book" data-room-id="{{id}}">Đặt lịch hẹn</button>
+                <!-- <button class="btn btn-secondary mt-2" onclick="goBackToList()">Quay lại danh sách</button> -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal đặt lịch hẹn (ẩn mặc định) -->
+<div id="appointmentModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.5); justify-content:center; align-items:center;">
+  <div style="background:#fff; padding:20px; border-radius:8px; min-width:300px;">
+    <h3>Đặt lịch hẹn</h3>
+    <form id="appointmentForm">
+      <label>Ngày đặt:</label>
+      <input type="datetime-local" id="comeDate" required><br><br>
+      <label>Ghi chú:</label>
+      <textarea id="note" rows="3"></textarea><br><br>
+      <button type="submit">Xác nhận</button>
+      <button type="button" id="closeModal">Hủy</button>
+    </form>
+  </div>
+</div>
+

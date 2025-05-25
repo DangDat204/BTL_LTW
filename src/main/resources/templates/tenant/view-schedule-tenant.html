@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Trọ Sinh Viên Giá Rẻ</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <style>
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            background: linear-gradient(to bottom, #f8f9fa, #ffffff);
+        }
+
+        main {
+            flex: 1;
+        }
+
+        .navbar {
+            background-color: #478d47;
+        }
+
+        .navbar-brand {
+            font-weight: bold;
+        }
+
+        .room-title {
+            text-align: center;
+            font-weight: 700;
+            font-size: 2rem;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .room-schedule {
+            padding: 20px;
+            background: #fff;
+            border: 2px solid #5e9c76;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            max-width: 800px;
+            margin: 20px auto;
+        }
+
+        .room-schedule table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .room-schedule th,
+        .room-schedule td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .room-schedule th {
+            background-color: #f2f2f2;
+        }
+
+        .room-schedule td a {
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        .room-schedule td a:hover {
+            text-decoration: underline;
+        }
+
+        footer {
+            background-color: #478d47;
+            color: white;
+            padding: 10px 0;
+            font-size: 14px;
+        }
+
+        footer p {
+            margin-bottom: 0;
+        }
+
+        footer img {
+            width: 20px;
+            margin: 0 3px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="navbar-placeholder"></div>
+
+    <!-- Nội dung chính -->
+    <main>
+        <div class="container">
+            <div class="room-title">Lịch xem phòng</div>
+            <div class="text-center my-3">
+                <button id="btnPending" class="btn btn-warning mx-2">Lịch hẹn chưa xác nhận</button>
+                <button id="btnConfirmed" class="btn btn-success mx-2">Lịch hẹn đã xác nhận</button>
+            </div>
+            <div class="room-schedule">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>STT</th>
+                            <th>Ngày đến</th>
+                            <th>Trạng thái</th>
+                            <th>Ghi chú</th>
+                            <th>Phòng</th>
+                        </tr>
+                    </thead>
+                    <tbody id="appointmentTableBody">
+                        <!-- Dữ liệu sẽ được render ở đây -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <div id="footer-placeholder"></div>
+
+    <!-- Modal chi tiết phòng -->
+    <div class="modal fade" id="roomDetailModal" tabindex="-1" aria-labelledby="roomDetailModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content" id="roomDetailContent">
+                <!-- Nội dung chi tiết phòng sẽ được render ở đây -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Nhúng navbar
+        fetch('/navbar.html')
+            .then(res => res.text())
+            .then(data => {
+                document.getElementById('navbar-placeholder').innerHTML = data;
+                if (window.handleNavbarRole) window.handleNavbarRole();
+            });
+        // Nhúng footer
+        fetch('/footer.html')
+            .then(res => res.text())
+            .then(data => {
+                document.getElementById('footer-placeholder').innerHTML = data;
+            });
+
+
+// hien thi cuoc hen
+        function renderAppointments(data) {
+            const tbody = document.getElementById('appointmentTableBody');
+            tbody.innerHTML = '';
+            if (!data || data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center text-danger">Không có lịch hẹn nào!</td></tr>';
+                return;
+            }
+            data.forEach((item, idx) => {
+                // Định dạng ngày
+                let dateStr = '';
+                if (item.comeDate) {
+                    const d = new Date(item.comeDate);
+                    dateStr = d.toLocaleDateString('vi-VN');
+                }
+                let statusStr = '';
+                if (item.status === 'PENDING') statusStr = 'Chưa xác nhận';
+                else if (item.status === 'CONFIRMED') statusStr = 'Đã xác nhận';
+                else statusStr = item.status || '';
+                tbody.innerHTML += `
+            <tr>
+                <td>${idx + 1}</td>
+                <td>${dateStr}</td>
+                <td>${statusStr}</td>
+                <td>${item.note || ''}</td>
+                <td><a href="#" onclick="showRoomDetail(${item.roomId}, '${item.comeDate}'); return false;">Xem chi tiết phòng</a></td>
+            </tr>
+        `;
+            });
+        }
+
+        function fetchAppointments(type) {
+            const token = localStorage.getItem('jwtToken');
+            let url = '';
+            if (type === 'pending') {
+                url = '/appointments/TenantAppointmentPending';
+            } else {
+                url = '/appointments/TenantAppointmentConfirmed';
+            }
+            fetch(url + '?pageNumber=1&pageSize=10', {
+                method: 'GET',
+                headers: {
+                    'Authorization': 'Bearer ' + token,
+                    'Content-Type': 'application/json'
+                }
+            })
+                .then(res => res.json())
+                .then(data => {
+                    // Lấy đúng key dữ liệu
+                    const result = data.result;
+                    const list = result['Tenant Pending Appointments'] || result['Tenant Confirmed Appointments'] || [];
+                    renderAppointments(list);
+                })
+                .catch(err => {
+                    document.getElementById('appointmentTableBody').innerHTML = '<tr><td colspan="5" class="text-center text-danger">Lỗi khi tải dữ liệu!</td></tr>';
+                });
+        }
+
+        document.getElementById('btnPending').onclick = () => fetchAppointments('pending');
+        document.getElementById('btnConfirmed').onclick = () => fetchAppointments('confirmed');
+
+        // Tải mặc định là lịch hẹn chưa xác nhận
+        fetchAppointments('pending');
+
+        // chi tiet phong
+        window.showRoomDetail = function(roomId, comeDate) {
+            const token = localStorage.getItem('jwtToken');
+            if (!token) {
+                alert('Bạn chưa đăng nhập!');
+                return;
+            }
+            fetch(`http://localhost:8080/rooms/${roomId}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': 'Bearer ' + token,
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                const room = data.result;
+                // Tách ngày và giờ đến
+                let dateStr = '', timeStr = '';
+                if (comeDate) {
+                    const d = new Date(comeDate);
+                    dateStr = d.toLocaleDateString('vi-VN');
+                    timeStr = d.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+                }
+                // Render nội dung chi tiết phòng
+                const html = `
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="roomDetailModalLabel">Chi tiết phòng</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p><b>Địa chỉ:</b> ${room.address}</p>
+                        <p><b>Diện tích:</b> ${room.area} m²</p>
+                        <p><b>Sức chứa:</b> ${room.capacity} người</p>
+                        <p><b>Mô tả:</b> ${room.description}</p>
+                        <p><b>Giá:</b> ${room.price} triệu/tháng</p>
+                        <p><b>Loại phòng:</b> ${room.roomType}</p>
+                        <p><b>Tiện nghi:</b> ${room.amenities}</p>
+                        <p><b>Số điện thoại chủ trọ:</b> ${room.landlordTel}</p>
+                        <p><b>Email chủ trọ:</b> ${room.landlordEmail}</p>
+                        <p><b>Ngày đến:</b> ${dateStr}</p>
+                        <p><b>Giờ đến:</b> ${timeStr}</p>
+                    </div>
+                `;
+                document.getElementById('roomDetailContent').innerHTML = html;
+                // Hiển thị modal
+                var modal = new bootstrap.Modal(document.getElementById('roomDetailModal'));
+                modal.show();
+            });
+        };
+    </script>
+    <script src="/js/common.js"></script>
+</body>
+
+</html>

@@ -1,16 +1,21 @@
-.navbar {
-background-color: #478d47;
-}
-
-.navbar-brand {
-font-weight: bold;
-}
+<style>
+    .navbar {
+        background-color: #478d47;
+    }
+    .navbar-brand {
+        font-weight: bold;
+    }
+    .user-greeting {
+        color: white;
+        margin-right: 10px;
+        font-weight: bold;
+    }
+</style>
 <nav class="navbar navbar-expand-lg navbar-dark">
     <div class="container">
         <a class="navbar-brand" href="#">
             <div>
-                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQT6R25_mY74-zGfMJoxPQnMmy_6PaEqsH-qA&s"
-                     alt="" width="50" height="50">
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQT6R25_mY74-zGfMJoxPQnMmy_6PaEqsH-qA&s" alt="" width="50" height="50">
                 Trọ giá rẻ
             </div>
         </a>
@@ -20,7 +25,7 @@ font-weight: bold;
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav me-auto">
                 <li class="nav-item"><a class="nav-link" href="index">Trang chủ</a></li>
-                <!--                ADMIN-->
+                <!-- ADMIN -->
                 <li class="nav-item" id="manageUsersLink" style="display: none;">
                     <a class="nav-link" href="manage-users.html">Quản lý người dùng</a>
                 </li>
@@ -30,19 +35,19 @@ font-weight: bold;
                 <li class="nav-item" id="approveRoomsLink" style="display: none;">
                     <a class="nav-link" href="approve-rooms.html">Duyệt phòng</a>
                 </li>
-                <!--                tenant-->
+                <!-- TENANT -->
                 <li class="nav-item" id="viewScheduleLink" style="display: none;">
-                    <a class="nav-link" href="view-schedule.html">Lịch xem phòng</a>
+                    <a class="nav-link" href="/home/view-schedule">Lịch xem phòng</a>
                 </li>
-                <!--                Landlord-->
+                <!-- LANDLORD -->
                 <li class="nav-item" id="addRoomsLink" style="display: none;">
-                    <a class="nav-link" href="#" onclick="navigateToAddRoom()">Thêm phòng trọ</a>
+                    <a class="nav-link" href="/home/addRoom">Thêm phòng trọ</a>
                 </li>
                 <li class="nav-item" id="roomsLink" style="display: none;">
-                    <a class="nav-link" href="#" onclick="navigateToManageRooms()">Quản lý phòng</a>
+                    <a class="nav-link" href="/home/list-room">Quản lý phòng</a>
                 </li>
                 <li class="nav-item" id="manageAppointmentsLink" style="display: none;">
-                    <a class="nav-link" href="#" onclick="navigateToManageAppointments()">Quản lý lịch hẹn</a>
+                    <a class="nav-link" href="/home/manager-schedule">Quản lý lịch hẹn</a>
                 </li>
             </ul>
             <ul class="navbar-nav ms-auto">

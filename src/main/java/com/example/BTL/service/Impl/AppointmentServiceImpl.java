@@ -112,7 +112,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         appointmentRepository.save(appointment);
         return appointmentMapper.toAppointmentResponse(appointment);
     }
-
+// lich hen dang cho duoc duyet
     @Override
     @PreAuthorize("hasRole('LANDLORD')")
     public Page<AppointmentResponse> getPendingAppointmentsForLandlord(int pageNumber, int pageSize) {
@@ -121,6 +121,21 @@ public class AppointmentServiceImpl implements AppointmentService {
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
         Pageable pageable = PageRequest.of(pageNumber - 1, pageSize); // Lưu ý pageNumber - 1
         Page<Appointment> appointmentPage = appointmentRepository.findByRoomUserIdAndStatus(landlord.getId(), AppointmentStatus.PENDING, pageable);
+        List<AppointmentResponse> responses = appointmentPage.getContent().stream()
+                .map(appointmentMapper::toAppointmentResponse)
+                .collect(Collectors.toList());
+
+        return new PageImpl<>(responses, pageable, appointmentPage.getTotalElements());
+    }
+// lich hen da duoc duyet
+    @Override
+    @PreAuthorize("hasRole('LANDLORD')")
+    public Page<AppointmentResponse> getConfirmedAppointmentsForLandlord(int pageNumber, int pageSize) {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        User landlord = userRepository.findUserByUsername(username)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+        Pageable pageable = PageRequest.of(pageNumber - 1, pageSize); // Lưu ý pageNumber - 1
+        Page<Appointment> appointmentPage = appointmentRepository.findByRoomUserIdAndStatus(landlord.getId(), AppointmentStatus.CONFIRMED, pageable);
         List<AppointmentResponse> responses = appointmentPage.getContent().stream()
                 .map(appointmentMapper::toAppointmentResponse)
                 .collect(Collectors.toList());

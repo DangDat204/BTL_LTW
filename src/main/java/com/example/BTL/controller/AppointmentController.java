@@ -63,7 +63,7 @@ public class AppointmentController {
     }
 
 
-
+// xac nhan lich hen
     @PutMapping("/approval/{id}")
     @PreAuthorize("hasRole('LANDLORD')")
     @ResponseBody
@@ -74,7 +74,7 @@ public class AppointmentController {
         ApiResponse<AppointmentResponse> apiResponse = new ApiResponse<>(1000, "Appointment status updated successfully", response);
         return apiResponse;
     }
-// danh sach appointment can duyet
+// danh sach my appointment landlord can duyet
     @GetMapping("/pendingAppointments")
     @PreAuthorize("hasRole('LANDLORD')")
     @ResponseBody
@@ -88,6 +88,22 @@ public class AppointmentController {
         response.put("totalPages", pendingAppointments.getTotalPages());
 
         ApiResponse<Map<String, Object>> apiResponse = new ApiResponse<>(1000, "All Pending Appointments", response);
+        return apiResponse;
+    }
+    // danh sach my appointment landlord da duoc duyet
+    @GetMapping("/confirmedAppointments")
+    @PreAuthorize("hasRole('LANDLORD')")
+    @ResponseBody
+    public ApiResponse<Map<String, Object>> getConfirmedAppointments(@RequestParam(defaultValue = "1") int pageNumber,
+                                                                   @RequestParam(defaultValue = "5") int pageSize){
+        Page<AppointmentResponse> pendingAppointments = appointmentService.getConfirmedAppointmentsForLandlord(pageNumber, pageSize);
+        Map<String, Object> response = new LinkedHashMap<>();
+        response.put("Confirmed rooms", pendingAppointments.getContent());
+        response.put("currentPage", pendingAppointments.getNumber() + 1);
+        response.put("totalItems", pendingAppointments.getTotalElements());
+        response.put("totalPages", pendingAppointments.getTotalPages());
+
+        ApiResponse<Map<String, Object>> apiResponse = new ApiResponse<>(1000, "All Confirmed Appointments", response);
         return apiResponse;
     }
 }

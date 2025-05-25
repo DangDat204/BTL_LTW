@@ -56,6 +56,7 @@ public class GlobalException {
     @ExceptionHandler(value = MethodArgumentNotValidException.class)
 //  truong hop RegisterRequest: dat ten, password
     ResponseEntity<ApiResponse> handlingValidation(MethodArgumentNotValidException exception){
+        log.error("Exception: ", exception);
         String enumKey = exception.getFieldError().getDefaultMessage();
 //        tra ve message trong RegisterRequest
 //        @Size(min = 5, message = "INVALID_PASSWORD")

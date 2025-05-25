@@ -1,5 +1,6 @@
 package com.example.BTL.controller;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -10,5 +11,25 @@ public class HomeController {
     @GetMapping("/index")
     public String index() {
         return "index.html"; // tương ứng với templates/index.html
+    }
+    // tenant view schedule
+    @GetMapping("/view-schedule")
+    public String viewSchedule() {
+        return "tenant/view-schedule-tenant.html"; // tương ứng với templates/index.html
+    }
+
+    // landlord
+    
+    @GetMapping("/addRoom")
+    public String addRoom(){
+        return "landlord/addRoom.html";
+    }
+    @GetMapping("/list-room")
+    public String listRoom(){
+        return "landlord/list-room.html";
+    }
+    @GetMapping("/manager-schedule")
+    public String managerSchedule(){
+        return "landlord/manager-schedule.html";
     }
 }

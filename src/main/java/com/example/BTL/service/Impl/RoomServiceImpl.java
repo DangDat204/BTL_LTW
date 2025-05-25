@@ -140,6 +140,7 @@ public class RoomServiceImpl implements RoomService {
 
         return new PageImpl<>(roomResponses, pageable, roomPage.getTotalElements());
     }
+//    phong da duoc duyet
     @PreAuthorize("hasRole('LANDLORD')")
     @Override
     public Page<RoomCreationResponse> getMyRoomsApproved(int pageNumber, int pageSize) {
@@ -148,6 +149,21 @@ public class RoomServiceImpl implements RoomService {
                 .orElseThrow(()->new AppException(ErrorCode.USER_NOT_EXISTED));
         Pageable pageable = PageRequest.of(pageNumber - 1, pageSize);
         Page<Room> roomPage = roomRepository.findByUserIdAndApprovalStatusAndDeletedFalse(landlord.getId(), RoomApprovalStatus.APPROVED, pageable);
+        List<RoomCreationResponse> roomResponses = roomPage.getContent().stream()
+                .map(roomMapper::toRoomResponse)
+                .collect(Collectors.toList());
+
+        return new PageImpl<>(roomResponses, pageable, roomPage.getTotalElements());
+    }
+//    phong da xoa
+    @PreAuthorize("hasRole('LANDLORD')")
+    @Override
+    public Page<RoomCreationResponse> getMyDeletedRoom(int pageNumber, int pageSize){
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        User landlord = userRepository.findUserByUsername(username)
+                .orElseThrow(()->new AppException(ErrorCode.USER_NOT_EXISTED));
+        Pageable pageable = PageRequest.of(pageNumber - 1, pageSize);
+        Page<Room> roomPage = roomRepository.findByUserIdAndDeletedTrue(landlord.getId(), pageable);
         List<RoomCreationResponse> roomResponses = roomPage.getContent().stream()
                 .map(roomMapper::toRoomResponse)
                 .collect(Collectors.toList());

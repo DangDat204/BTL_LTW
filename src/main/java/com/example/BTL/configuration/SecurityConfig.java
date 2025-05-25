@@ -37,9 +37,24 @@ public class SecurityConfig {
                 .authorizeHttpRequests(request -> request
                         .requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINTS).permitAll()
                         .requestMatchers(HttpMethod.GET, PUBLIC_ENDPOINTS2).permitAll()
-
+                        // tenant
+                        .requestMatchers(HttpMethod.GET, "/home/view-schedule").permitAll()
+                        // landlord
+                        .requestMatchers(HttpMethod.GET, "/home/addRoom").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/home/list-room").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/home/manager-schedule").permitAll()
 //                        .requestMatchers(HttpMethod.POST, "/rooms/create_room").hasRole("LANDLORD")
                         .requestMatchers(HttpMethod.GET, "/home/index").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/*.html").permitAll()
+                        .requestMatchers(
+                            "/room-detail.html",
+                            "/room-detail.css",
+                            "/css/**",
+                            "/js/**",
+                            "/images/**",
+                            "/static/**",
+                            "/favicon.ico"
+                        ).permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement()

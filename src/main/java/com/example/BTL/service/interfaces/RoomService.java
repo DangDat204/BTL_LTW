@@ -22,6 +22,7 @@ public interface RoomService {
     Page<RoomCreationResponse> getMyRoomsPending(int pageNumber, int pageSize);
 //    List<RoomCreationResponse> getMyRoomsApproved();
     Page<RoomCreationResponse> getMyRoomsApproved(int pageNumber, int pageSize);
+    Page<RoomCreationResponse> getMyDeletedRoom(int pageNumber, int pageSize);
 //    admin
     RoomCreationResponse approveRoom(Long roomId, RoomApprovalRequest request);
     Page<RoomCreationResponse> getPendingRooms(int pageNumber, int pageSize);

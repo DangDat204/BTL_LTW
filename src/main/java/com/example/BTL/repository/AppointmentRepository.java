@@ -14,5 +14,6 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
 // Phương thức mới: Lấy danh sách lịch hẹn PENDING của các phòng thuộc landlord
     @Query("SELECT a FROM Appointment a WHERE a.room.user.id = :landlordId AND a.status = :status")
     Page<Appointment> findByRoomUserIdAndStatus(Long landlordId, AppointmentStatus status, Pageable pageable);
-//    Page<Appointment> findByStatus(AppointmentStatus status, Pageable pageable);
+
+
 }

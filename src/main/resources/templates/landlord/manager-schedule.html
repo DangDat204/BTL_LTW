@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Trọ Sinh Viên Giá Rẻ - Lịch Xem Phòng</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <style>
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            background: #f5eeef;
+        }
+
+        .container {
+            flex: 1;
+            /* Đẩy footer xuống dưới */
+        }
+
+        /* Style for the table */
+        .room-schedule {
+            margin-top: 20px;
+            padding: 20px;
+            background: #fff;
+            border: 2px solid #5e9c76;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .room-schedule table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .room-schedule th,
+        .room-schedule td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+            border-right: 1px solid #ddd;
+        }
+
+        .room-schedule th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+
+        .room-schedule td a {
+            text-decoration: none;
+            display: block; /* Hiển thị mỗi liên kết trên một dòng */
+            margin: 2px 0;
+        }
+
+        /* Màu sắc riêng cho từng trạng thái */
+        .room-schedule td a.approve {
+            color: #18e348; /* Màu xanh lá cho "Duyệt" */
+        }
+
+        .room-schedule td a.reject {
+            color: #dc3545; /* Màu đỏ cho "Không duyệt" */
+        }
+
+        .room-schedule td a:hover {
+            text-decoration: underline;
+        }
+
+        .room-title {
+            text-align: center;
+            font-weight: 700;
+            font-size: 2rem;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .appointment-buttons {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .appointment-buttons button {
+            margin: 0 10px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .appointment-buttons button.active {
+            background-color: #5e9c76;
+            color: white;
+        }
+
+        .pagination {
+            margin-top: 20px;
+            justify-content: center;
+        }
+
+        .pagination button {
+            margin: 0 5px;
+            padding: 5px 10px;
+            border: 1px solid #ddd;
+            background: white;
+            cursor: pointer;
+        }
+
+        .pagination button.active {
+            background-color: #5e9c76;
+            color: white;
+            border-color: #5e9c76;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="navbar-placeholder"></div>
+
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="room-title">Lịch hẹn</div>
+                <div class="appointment-buttons">
+                    <button id="pendingBtn" class="active">Lịch hẹn chưa xác nhận</button>
+                    <button id="confirmedBtn">Lịch hẹn đã được duyệt</button>
+                </div>
+                <div class="room-schedule">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>STT</th>
+                                <th>Ngày hẹn</th>
+                                <th>Ghi chú</th>
+                                <th>Trạng thái</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="appointmentTableBody">
+                        </tbody>
+                    </table>
+                    <div class="pagination" id="pagination">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="footer-placeholder"></div>
+    <script>
+        fetch('/navbar.html')
+            .then(res => res.text())
+            .then(data => {
+                document.getElementById('navbar-placeholder').innerHTML = data;
+                if (window.handleNavbarRole) window.handleNavbarRole();
+            });
+
+        // Nhúng footer
+        fetch('/footer.html')
+            .then(res => res.text())
+            .then(data => {
+                document.getElementById('footer-placeholder').innerHTML = data;
+            });
+
+        let currentPage = 1;
+        let currentType = 'pending';
+
+        function loadAppointments(type, page) {
+            const token = localStorage.getItem('jwtToken');
+            if (!token) {
+                window.location.href = '/login';
+                return;
+            }
+
+            const url = type === 'pending' ? '/appointments/pendingAppointments' : '/appointments/confirmedAppointments';
+            
+            fetch(`${url}?pageNumber=${page}&pageSize=5`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.code === 1000) {
+                    const appointments = data.result[type === 'pending' ? 'Pending rooms' : 'Confirmed rooms'];
+                    const totalPages = data.result.totalPages;
+                    
+                    // Update table
+                    const tbody = document.getElementById('appointmentTableBody');
+                    tbody.innerHTML = '';
+                    
+                    appointments.forEach((appointment, index) => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${(page - 1) * 5 + index + 1}</td>
+                            <td>${new Date(appointment.comeDate).toLocaleString('vi-VN')}</td>
+                            <td>${appointment.note || 'Không có ghi chú'}</td>
+                            <td>${appointment.status === 'CONFIRMED' ? 'Đã duyệt' : 'Chờ duyệt'}</td>
+                            <td>
+                                ${type === 'pending' ? `
+                                    <a href="#" class="approve" onclick="handleAppointment(${appointment.id}, 'approve')">Duyệt</a>
+                                    <a href="#" class="reject" onclick="handleAppointment(${appointment.id}, 'reject')">Không duyệt</a>
+                                ` : ''}
+                                <a href="#" onclick="showRoomDetail(${appointment.roomId}); return false;">Xem phòng</a>
+                                <a href="#" onclick="showTenantDetail(${appointment.tenantId}); return false;">Xem người thuê</a>
+                            </td>
+                        `;
+                        tbody.appendChild(row);
+                    });
+
+                    // Update pagination
+                    updatePagination(page, totalPages);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        function updatePagination(currentPage, totalPages) {
+            const pagination = document.getElementById('pagination');
+            pagination.innerHTML = '';
+
+            for (let i = 1; i <= totalPages; i++) {
+                const button = document.createElement('button');
+                button.textContent = i;
+                if (i === currentPage) {
+                    button.classList.add('active');
+                }
+                button.onclick = () => loadAppointments(currentType, i);
+                pagination.appendChild(button);
+            }
+        }
+
+        function handleAppointment(appointmentId, action) {
+            const token = localStorage.getItem('jwtToken');
+            if (!token) {
+                window.location.href = '/login';
+                return;
+            }
+
+            let status = action === 'approve' ? 'confirmed' : 'rejected';
+
+            fetch(`/appointments/approval/${appointmentId}`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ status: status })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.code === 1000) {
+                    loadAppointments(currentType, currentPage);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        function showRoomDetail(roomId) {
+            const token = localStorage.getItem('jwtToken');
+            if (!token) {
+                window.location.href = '/login';
+                return;
+            }
+            fetch(`/rooms/${roomId}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.code === 1000) {
+                    const room = data.result;
+                    document.getElementById('modal-room-image').src = room.images && room.images.length > 0 ? room.images[0].url : '';
+                    document.getElementById('modal-room-title').innerText = `PHÒNG ${room.id} (${room.roomType})`;
+                    document.getElementById('modal-room-id').innerText = room.id;
+                    document.getElementById('modal-room-address').innerText = room.address;
+                    document.getElementById('modal-room-area').innerText = room.area;
+                    document.getElementById('modal-room-capacity').innerText = room.capacity;
+                    document.getElementById('modal-room-description').innerText = room.description;
+                    document.getElementById('modal-room-price').innerText = room.price;
+                    document.getElementById('modal-room-type').innerText = room.roomType;
+                    document.getElementById('modal-room-amenities').innerText = room.amenities;
+                    var myModal = new bootstrap.Modal(document.getElementById('roomDetailModal'));
+                    myModal.show();
+                }
+            });
+        }
+
+        function showTenantDetail(tenantId) {
+            const token = localStorage.getItem('jwtToken');
+            if (!token) {
+                window.location.href = '/login';
+                return;
+            }
+            fetch(`/user/getInfoUser/${tenantId}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.code === 1000) {
+                    const user = data.result;
+                    document.getElementById('modal-tenant-id').innerText = user.id;
+                    document.getElementById('modal-tenant-username').innerText = user.username;
+                    document.getElementById('modal-tenant-fullname').innerText = user.fullname;
+                    document.getElementById('modal-tenant-email').innerText = user.email;
+                    document.getElementById('modal-tenant-tel').innerText = user.tel;
+                    document.getElementById('modal-tenant-role').innerText = user.role;
+                    var myModal = new bootstrap.Modal(document.getElementById('tenantDetailModal'));
+                    myModal.show();
+                }
+            });
+        }
+
+        // Event listeners for buttons
+        document.getElementById('pendingBtn').addEventListener('click', function() {
+            currentType = 'pending';
+            currentPage = 1;
+            this.classList.add('active');
+            document.getElementById('confirmedBtn').classList.remove('active');
+            loadAppointments('pending', 1);
+        });
+
+        document.getElementById('confirmedBtn').addEventListener('click', function() {
+            currentType = 'confirmed';
+            currentPage = 1;
+            this.classList.add('active');
+            document.getElementById('pendingBtn').classList.remove('active');
+            loadAppointments('confirmed', 1);
+        });
+
+        // Load initial data
+        loadAppointments('pending', 1);
+    </script>
+    <script src="/js/common.js"></script>
+
+    <!-- Modal hiển thị chi tiết phòng -->
+    <div class="modal fade" id="roomDetailModal" tabindex="-1" aria-labelledby="roomDetailModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="roomDetailModalLabel">Chi tiết phòng</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+          </div>
+          <div class="modal-body">
+            <img id="modal-room-image" src="" alt="Ảnh phòng" style="width:100%;max-height:300px;object-fit:cover;">
+            <h4 id="modal-room-title" class="mt-3"></h4>
+            <div class="room-info mt-2">
+              <div><b>ID phòng:</b> <span id="modal-room-id"></span></div>
+              <div><b>Địa chỉ:</b> <span id="modal-room-address"></span></div>
+              <div><b>Diện tích:</b> <span id="modal-room-area"></span> m²</div>
+              <div><b>Sức chứa:</b> <span id="modal-room-capacity"></span> người</div>
+              <div><b>Mô tả:</b> <span id="modal-room-description"></span></div>
+              <div><b>Giá:</b> <span id="modal-room-price"></span> triệu/tháng</div>
+              <div><b>Loại phòng:</b> <span id="modal-room-type"></span></div>
+              <div><b>Tiện nghi:</b> <span id="modal-room-amenities"></span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal hiển thị thông tin người thuê -->
+    <div class="modal fade" id="tenantDetailModal" tabindex="-1" aria-labelledby="tenantDetailModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="tenantDetailModalLabel">Thông tin người thuê</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+          </div>
+          <div class="modal-body">
+            <div class="tenant-info">
+              <div><b>ID:</b> <span id="modal-tenant-id"></span></div>
+              <div><b>Username:</b> <span id="modal-tenant-username"></span></div>
+              <div><b>Họ tên:</b> <span id="modal-tenant-fullname"></span></div>
+              <div><b>Email:</b> <span id="modal-tenant-email"></span></div>
+              <div><b>Số điện thoại:</b> <span id="modal-tenant-tel"></span></div>
+              <div><b>Vai trò:</b> <span id="modal-tenant-role"></span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+</body>
+
+</html>
