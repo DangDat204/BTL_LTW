@@ -37,6 +37,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(request -> request
                         .requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINTS).permitAll()
                         .requestMatchers(HttpMethod.GET, PUBLIC_ENDPOINTS2).permitAll()
+                        .requestMatchers(HttpMethod.GET, "/home/account").permitAll()
                         // tenant
                         .requestMatchers(HttpMethod.GET, "/home/view-schedule").permitAll()
                         // landlord
@@ -44,6 +45,10 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/home/list-room").permitAll()
                         .requestMatchers(HttpMethod.GET, "/home/manager-schedule").permitAll()
 //                        .requestMatchers(HttpMethod.POST, "/rooms/create_room").hasRole("LANDLORD")
+                        // admin
+                        .requestMatchers(HttpMethod.GET, "/home/manager-user").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/home/manager-room").permitAll()
+                        
                         .requestMatchers(HttpMethod.GET, "/home/index").permitAll()
                         .requestMatchers(HttpMethod.GET, "/*.html").permitAll()
                         .requestMatchers(

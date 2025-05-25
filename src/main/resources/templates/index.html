@@ -6,6 +6,7 @@
 	<title>Trọ Sinh Viên Giá Rẻ</title>
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 	<style>
 		html,
 		body {
@@ -44,6 +45,13 @@
 
 		.card:hover {
 			transform: scale(1.05);
+		}
+
+		#comments-section {
+			background: #f8f9fa;
+			border-radius: 12px;
+			padding: 24px 18px 8px 18px;
+			margin-bottom: 32px;
 		}
 
 	</style>
@@ -171,6 +179,23 @@
 	</div>
 
 	<div id="footer-placeholder"></div>
+
+	<!-- Chatbot Widget -->
+	<div id="chatbot-widget" style="position: fixed; bottom: 24px; right: 24px; z-index: 9999;">
+		<div id="chatbot-bubble" style="background:#2563eb;color:#fff;padding:12px 18px;border-radius:24px 24px 0 24px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.15);font-weight:500;">
+			<i class="bi bi-chat-dots"></i> Chatbot hỗ trợ
+		</div>
+		<div id="chatbot-window" style="display:none;width:340px;max-width:90vw;background:#fff;border-radius:16px;box-shadow:0 4px 24px rgba(0,0,0,0.18);margin-top:8px;">
+			<div style="background:#2563eb;color:#fff;padding:12px 16px;border-radius:16px 16px 0 0;font-weight:600;">Chatbot hỏi đáp phòng trọ
+				<span id="chatbot-close" style="float:right;cursor:pointer;">&times;</span>
+			</div>
+			<div id="chatbot-messages" style="height:260px;overflow-y:auto;padding:12px;background:#f8f9fa;"></div>
+			<form id="chatbot-form" style="display:flex;border-top:1px solid #eee;">
+				<input id="chatbot-input" type="text" class="form-control" placeholder="Nhập câu hỏi..." autocomplete="off" style="border:none;border-radius:0;box-shadow:none;">
+				<button class="btn btn-primary" type="submit" style="border-radius:0 0 16px 0;">Gửi</button>
+			</form>
+		</div>
+	</div>
 
 	<script>
 		// Nhúng navbar
@@ -359,91 +384,280 @@
 					'Content-Type': 'application/json'
 				}
 			})
-				.then(res => res.json())
-				.then(data => {
-					const room = data.result;
-					// Lấy template HTML
-					fetch('/room-detail.html')
-						.then(res => res.text())
-						.then(html => {
-							// Xử lý ảnh cho carousel
-							let carouselIndicators = '';
-							let carouselItems = '';
-							if (room.images && room.images.length > 0) {
-								room.images.forEach((img, idx) => {
-									carouselIndicators += `
-										<button type="button" data-bs-target="#carouselExampleDark" data-bs-slide-to="${idx}" class="${idx === 0 ? 'active' : ''}" aria-current="${idx === 0 ? 'true' : 'false'}" aria-label="Slide ${idx + 1}"></button>
-									`;
-									carouselItems += `
-									<div class="carousel-item${idx === 0 ? ' active' : ''}">
-										<img src="${img.url}" class="d-block" alt="...">
-									</div>
-									`;
+			.then(res => res.json())
+			.then(data => {
+				const room = data.result;
+				// Lấy template HTML
+				fetch('/room-detail.html')
+					.then(res => res.text())
+					.then(html => {
+						// Xử lý ảnh cho carousel
+						let carouselIndicators = '';
+						let carouselItems = '';
+						if (room.images && room.images.length > 0) {
+							room.images.forEach((img, idx) => {
+								carouselIndicators += `
+									<button type="button" data-bs-target="#carouselExampleDark" data-bs-slide-to="${idx}" class="${idx === 0 ? 'active' : ''}" aria-current="${idx === 0 ? 'true' : 'false'}" aria-label="Slide ${idx + 1}"></button>
+								`;
+								carouselItems += `
+								<div class="carousel-item${idx === 0 ? ' active' : ''}">
+									<img src="${img.url}" class="d-block" alt="...">
+								</div>
+								`;
+							});
+						} else {
+							carouselIndicators = `<button type="button" data-bs-target="#carouselExampleDark" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>`;
+							carouselItems = `<div class="carousel-item active"><img src="https://via.placeholder.com/400x250" class="d-block" alt="..."></div>`;
+						}
+						// Thay thế các placeholder
+						html = html.replace('{{carouselIndicators}}', carouselIndicators)
+							.replace('{{carouselItems}}', carouselItems)
+							.replace(/{{id}}/g, room.id)
+							.replace(/{{address}}/g, room.address)
+							.replace(/{{area}}/g, room.area)
+							.replace(/{{capacity}}/g, room.capacity)
+							.replace(/{{description}}/g, room.description)
+							.replace(/{{price}}/g, room.price)
+							.replace(/{{roomType}}/g, room.roomType)
+							.replace(/{{amenities}}/g, room.amenities)
+							.replace(/{{landlordTel}}/g, room.landlordTel)
+							.replace(/{{landlordEmail}}/g, room.landlordEmail);
+						// Thêm phần comment vào cuối html
+						html += `
+							<div id="comments-section" class="mt-5">
+								<h4>Bình luận về phòng này</h4>
+								<div id="comment-form-container" class="mb-4"></div>
+								<div id="comments-list"></div>
+							</div>
+						`;
+						// Gán vào main-content (chỉ 1 lần)
+						document.getElementById('main-content').innerHTML = html;
+						// Kích hoạt lại carousel
+						var carousel = new bootstrap.Carousel(document.getElementById('carouselExampleDark'));
+						// Gán lại sự kiện cho modal đặt lịch hẹn
+						var btnBook = document.querySelector('.btn-book');
+						var closeModalBtn = document.getElementById('closeModal');
+						var appointmentModal = document.getElementById('appointmentModal');
+						var appointmentForm = document.getElementById('appointmentForm');
+						if (btnBook && closeModalBtn && appointmentModal && appointmentForm) {
+							btnBook.onclick = function () {
+								appointmentModal.style.display = 'flex';
+							};
+							closeModalBtn.onclick = function () {
+								appointmentModal.style.display = 'none';
+							};
+							appointmentForm.onsubmit = async function (e) {
+								e.preventDefault();
+								const comeDate = document.getElementById('comeDate').value;
+								const note = document.getElementById('note').value;
+								const roomId = document.getElementById('roomIdSpan').textContent.trim();
+								const token = localStorage.getItem('jwtToken');
+								const res = await fetch('/appointments/createAppointment', {
+									method: 'POST',
+									headers: {
+										'Content-Type': 'application/json',
+										'Authorization': 'Bearer ' + token
+									},
+									body: JSON.stringify({
+										roomId: roomId,
+										comeDate: comeDate,
+										note: note
+									})
 								});
-							} else {
-								carouselIndicators = `<button type="button" data-bs-target="#carouselExampleDark" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>`;
-								carouselItems = `<div class="carousel-item active"><img src="https://via.placeholder.com/400x250" class="d-block" alt="..."></div>`;
-							}
-							// Thay thế các placeholder
-							html = html.replace('{{carouselIndicators}}', carouselIndicators)
-								.replace('{{carouselItems}}', carouselItems)
-								.replace(/{{id}}/g, room.id)
-								.replace(/{{address}}/g, room.address)
-								.replace(/{{area}}/g, room.area)
-								.replace(/{{capacity}}/g, room.capacity)
-								.replace(/{{description}}/g, room.description)
-								.replace(/{{price}}/g, room.price)
-								.replace(/{{roomType}}/g, room.roomType)
-								.replace(/{{amenities}}/g, room.amenities)
-								.replace(/{{landlordTel}}/g, room.landlordTel)
-								.replace(/{{landlordEmail}}/g, room.landlordEmail);
-							// Gán vào main-content
-							document.getElementById('main-content').innerHTML = html;
-							// Kích hoạt lại carousel
-							var carousel = new bootstrap.Carousel(document.getElementById('carouselExampleDark'));
-							// Gán lại sự kiện cho modal đặt lịch hẹn
-							var btnBook = document.querySelector('.btn-book');
-							var closeModalBtn = document.getElementById('closeModal');
-							var appointmentModal = document.getElementById('appointmentModal');
-							var appointmentForm = document.getElementById('appointmentForm');
-							if (btnBook && closeModalBtn && appointmentModal && appointmentForm) {
-								btnBook.onclick = function () {
-									appointmentModal.style.display = 'flex';
-								};
-								closeModalBtn.onclick = function () {
+								const data = await res.json();
+								if (data.code === 1000) {
+									alert('Đặt lịch thành công!');
 									appointmentModal.style.display = 'none';
-								};
-								appointmentForm.onsubmit = async function (e) {
-									e.preventDefault();
-									const comeDate = document.getElementById('comeDate').value;
-									const note = document.getElementById('note').value;
-									const roomId = document.getElementById('roomIdSpan').textContent.trim();
-									const token = localStorage.getItem('jwtToken');
-									const res = await fetch('/appointments/createAppointment', {
-										method: 'POST',
-										headers: {
-											'Content-Type': 'application/json',
-											'Authorization': 'Bearer ' + token
-										},
-										body: JSON.stringify({
-											roomId: roomId,
-											comeDate: comeDate,
-											note: note
-										})
+								} else {
+									alert('Có lỗi xảy ra: ' + data.message);
+								}
+							};
+						}
+						// Sau đó mới render form comment và danh sách comment
+						const commentsListDiv = document.getElementById('comments-list');
+						const commentFormContainer = document.getElementById('comment-form-container');
+						// Hiện form nếu là TENANT (token có role TENANT)
+						function parseJwt (token) {
+							try {
+								return JSON.parse(atob(token.split('.')[1]));
+							} catch (e) {
+								return null;
+							}
+						}
+						const rawToken = token.replace('Bearer ', '');
+						const payload = parseJwt(rawToken);
+						if (
+							payload && payload.authorities &&
+							(payload.authorities.includes('TENANT') || payload.authorities.includes('ROLE_TENANT'))
+						) {
+							commentFormContainer.innerHTML = `
+								<form id="comment-form" class="p-3 bg-white shadow-sm rounded-3 border" style="max-width:600px;">
+									<div class="mb-2">
+										<label for="comment-content" class="form-label fw-bold">Nội dung bình luận</label>
+										<textarea id="comment-content" class="form-control" rows="3" required placeholder="Nhập bình luận của bạn..."></textarea>
+									</div>
+									<div class="mb-3 d-flex align-items-center">
+										<label class="form-label fw-bold me-2 mb-0">Đánh giá:</label>
+										<span id="star-rating">
+											<i class="bi bi-star" data-value="1"></i>
+											<i class="bi bi-star" data-value="2"></i>
+											<i class="bi bi-star" data-value="3"></i>
+											<i class="bi bi-star" data-value="4"></i>
+											<i class="bi bi-star" data-value="5"></i>
+										</span>
+										<input type="hidden" id="comment-rating" value="5" required>
+									</div>
+									<button type="submit" class="btn btn-primary px-4">Gửi bình luận</button>
+								</form>
+							`;
+							// Star rating UI
+							const stars = commentFormContainer.querySelectorAll('#star-rating i');
+							let currentRating = 5;
+							stars.forEach(star => {
+								star.classList.add('bi', 'bi-star');
+								star.style.fontSize = '1.5em';
+								star.style.cursor = 'pointer';
+								star.addEventListener('mouseenter', function() {
+									const val = +this.getAttribute('data-value');
+									stars.forEach((s, idx) => {
+										s.classList.toggle('bi-star-fill', idx < val);
+										s.classList.toggle('bi-star', idx >= val);
+										s.style.color = idx < val ? '#ffc107' : '#adb5bd';
 									});
-									const data = await res.json();
+								});
+								star.addEventListener('mouseleave', function() {
+									stars.forEach((s, idx) => {
+										s.classList.toggle('bi-star-fill', idx < currentRating);
+										s.classList.toggle('bi-star', idx >= currentRating);
+										s.style.color = idx < currentRating ? '#ffc107' : '#adb5bd';
+									});
+								});
+								star.addEventListener('click', function() {
+									currentRating = +this.getAttribute('data-value');
+									document.getElementById('comment-rating').value = currentRating;
+								});
+							});
+							// Set default stars
+							stars.forEach((s, idx) => {
+								s.classList.toggle('bi-star-fill', idx < 5);
+								s.classList.toggle('bi-star', idx >= 5);
+								s.style.color = idx < 5 ? '#ffc107' : '#adb5bd';
+							});
+							document.getElementById('comment-form').onsubmit = function(e) {
+								e.preventDefault();
+								const content = document.getElementById('comment-content').value.trim();
+								const rating = document.getElementById('comment-rating').value;
+								fetch(`http://localhost:8080/comments/createComment/${room.id}`, {
+									method: 'POST',
+									headers: {
+										'Authorization': 'Bearer ' + token,
+										'Content-Type': 'application/json'
+									},
+									body: JSON.stringify({ content, rating })
+								})
+								.then(res => res.json())
+								.then(data => {
 									if (data.code === 1000) {
-										alert('Đặt lịch thành công!');
-										appointmentModal.style.display = 'none';
+										alert('Gửi bình luận thành công!');
+										showRoomDetail(room.id); // Reload lại chi tiết phòng và comment
 									} else {
-										alert('Có lỗi xảy ra: ' + data.message);
+										alert('Lỗi: ' + data.message);
 									}
-								};
+								});
+							};
+						} else {
+							commentFormContainer.innerHTML = `<div class="alert alert-info">Bạn cần đăng nhập với vai trò người thuê để bình luận.</div>`;
+						}
+						fetch(`http://localhost:8080/comments/${room.id}`, {
+							method: 'GET',
+							headers: {
+								'Authorization': 'Bearer ' + token,
+								'Content-Type': 'application/json'
+							}
+						})
+						.then(res => res.json())
+						.then(data => {
+							if (data.code === 1000 && data.result.length > 0) {
+								commentsListDiv.innerHTML = data.result.map(c => `
+									<div class="d-flex align-items-start mb-4 p-3 bg-white shadow-sm rounded-3" style="border:1px solid #eee;">
+										<div class="me-3">
+											<div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center" style="width:48px;height:48px;font-size:1.3rem;">
+												${c.tenantUsername ? c.tenantUsername.charAt(0).toUpperCase() : 'U'}
+											</div>
+										</div>
+										<div class="flex-grow-1">
+											<div class="d-flex align-items-center mb-1">
+												<span class="fw-bold me-2">${c.tenantUsername}</span>
+												<span class="text-muted" style="font-size:0.95em;">${new Date(c.createdAt).toLocaleDateString('vi-VN')}</span>
+											</div>
+											<div class="mb-1">
+												<span class="text-warning" style="font-size:1.1em;">${'★'.repeat(c.rating)}${'☆'.repeat(5-c.rating)}</span>
+											</div>
+											<div style="font-size:1.05em;">${c.content}</div>
+										</div>
+									</div>
+								`).join('');
+							} else {
+								commentsListDiv.innerHTML = "<i>Chưa có bình luận nào.</i>";
 							}
 						});
-				});
+					});
+			});
 		};
 	</script>
+	<script>
+		(function() {
+		  // Câu hỏi thường gặp và trả lời mẫu
+		  const faq = [
+			{ q: /giá.*phòng|phòng.*giá/i, a: "Giá phòng trọ dao động từ 1.5 triệu đến 5 triệu tuỳ khu vực và loại phòng. Bạn có thể dùng bộ lọc để tìm phòng phù hợp." },
+			{ q: /địa chỉ|khu vực|ở đâu/i, a: "Bạn có thể chọn địa chỉ/khu vực ở bộ lọc bên trái để xem các phòng trọ tại khu vực đó." },
+			{ q: /liên hệ|số điện thoại|email/i, a: "Khi bấm 'Xem chi tiết' phòng, bạn sẽ thấy thông tin liên hệ chủ trọ ở cuối trang chi tiết." },
+			{ q: /tiện nghi|có.*gì|nội thất/i, a: "Mỗi phòng sẽ có phần mô tả tiện nghi riêng. Bạn hãy bấm 'Xem chi tiết' để xem tiện nghi cụ thể của từng phòng." },
+			{ q: /đặt lịch|xem phòng|hẹn/i, a: "Bạn có thể đặt lịch xem phòng trực tiếp ở trang chi tiết phòng bằng cách bấm nút 'Đặt lịch hẹn'." },
+			{ q: /bình luận|đánh giá/i, a: "Bạn có thể xem và gửi bình luận, đánh giá ở cuối trang chi tiết phòng." },
+			{ q: /chào|hello|hi|xin chào/i, a: "Chào bạn! Tôi có thể giúp gì về phòng trọ?" }
+		  ];
+		
+		  // Hiển thị/ẩn chatbot
+		  const bubble = document.getElementById('chatbot-bubble');
+		  const windowBox = document.getElementById('chatbot-window');
+		  const closeBtn = document.getElementById('chatbot-close');
+		  bubble.onclick = () => { windowBox.style.display = 'block'; bubble.style.display = 'none'; };
+		  closeBtn.onclick = () => { windowBox.style.display = 'none'; bubble.style.display = 'block'; };
+		
+		  // Xử lý gửi tin nhắn
+		  const form = document.getElementById('chatbot-form');
+		  const input = document.getElementById('chatbot-input');
+		  const messages = document.getElementById('chatbot-messages');
+		  function addMsg(msg, from) {
+			const div = document.createElement('div');
+			div.style.margin = '8px 0';
+			div.style.textAlign = from === 'user' ? 'right' : 'left';
+			div.innerHTML = `<span style="display:inline-block;max-width:80%;padding:8px 14px;border-radius:16px;${from==='user'?'background:#2563eb;color:#fff;':'background:#e9ecef;'}">${msg}</span>`;
+			messages.appendChild(div);
+			messages.scrollTop = messages.scrollHeight;
+		  }
+		  form.onsubmit = function(e) {
+			e.preventDefault();
+			const text = input.value.trim();
+			if (!text) return;
+			addMsg(text, 'user');
+			input.value = '';
+			// Tìm câu trả lời phù hợp
+			let found = false;
+			for (const f of faq) {
+			  if (f.q.test(text)) {
+				setTimeout(() => addMsg(f.a, 'bot'), 400);
+				found = true;
+				break;
+			  }
+			}
+			if (!found) setTimeout(() => addMsg('Xin lỗi, tôi chưa hiểu ý bạn. Bạn có thể hỏi về giá, địa chỉ, tiện nghi, đặt lịch, liên hệ...', 'bot'), 400);
+		  };
+		  // Lời chào mặc định
+		  addMsg('Xin chào! Tôi là chatbot hỗ trợ về phòng trọ. Bạn muốn hỏi gì?', 'bot');
+		})();
+		</script>
 	<script src="/js/common.js"></script>
 </body>
 

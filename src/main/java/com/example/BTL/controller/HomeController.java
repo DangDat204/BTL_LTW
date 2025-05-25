@@ -32,4 +32,20 @@ public class HomeController {
     public String managerSchedule(){
         return "landlord/manager-schedule.html";
     }
+
+    // chỉnh sửa thông tin cá nhân
+    @GetMapping("/account")
+    public String account(){
+        return "user/account.html";
+    }
+
+    // admin
+    @GetMapping("/manager-user")
+    public String managerUser(){
+        return "admin/manager-user.html";
+    }
+    @GetMapping("/manager-room")
+    public String managerRoom(){
+        return "admin/manager-room.html";
+    }
 }
