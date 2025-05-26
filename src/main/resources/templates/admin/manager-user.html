@@ -23,6 +23,17 @@
             /* Đẩy footer xuống dưới */
         }
 
+        .btn-lock {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+        }
+
+        .btn-unlock {
+            background-color: #28a745;
+            color: white;
+            border: none;
+        }
         
     </style>
 </head>
@@ -52,6 +63,8 @@
                             <th>Họ tên</th>
                             <th>SĐT</th>
                             <th>Role</th>
+                            <th>Trạng thái</th>
+                            <th>Hành động</th>
                         </tr>
                     </thead>
                     <tbody id="users-table-body">
@@ -69,6 +82,8 @@
     <script>
         let currentPage = 1;
         const pageSize = 5;
+        // Lưu trạng thái khóa của người dùng
+        let userLockStatus = {};
 
         // Nhúng navbar
         fetch('/navbar.html')
@@ -121,6 +136,11 @@
             const tableBody = document.getElementById('users-table-body');
             tableBody.innerHTML = '';
             users.forEach(user => {
+                // Khởi tạo trạng thái nếu chưa có
+                if (!(user.id in userLockStatus)) {
+                    userLockStatus[user.id] = false; // Mặc định là không khóa
+                }
+
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td>${user.id}</td>
@@ -129,6 +149,19 @@
                     <td>${user.fullname}</td>
                     <td>${user.tel}</td>
                     <td>${user.role}</td>
+                    <td id="status-${user.id}">
+                        ${userLockStatus[user.id] ? 
+                            '<span class="text-danger">Đã khóa</span>' : 
+                            '<span class="text-success">Không bị khóa</span>'
+                        }
+                    </td>
+                    <td>
+                        <button class="btn ${userLockStatus[user.id] ? 'btn-unlock' : 'btn-lock'} btn-sm" 
+                                onclick="toggleUserStatus(${user.id})" 
+                                id="btn-${user.id}">
+                            ${userLockStatus[user.id] ? 'Mở khóa' : 'Khóa'}
+                        </button>
+                    </td>
                 `;
                 tableBody.appendChild(row);
             });
@@ -160,6 +193,30 @@
         document.addEventListener('DOMContentLoaded', () => {
             loadUsers(1);
         });
+
+        // Hàm xử lý khóa/mở khóa người dùng
+        function toggleUserStatus(userId) {
+            // Đảo ngược trạng thái khóa
+            userLockStatus[userId] = !userLockStatus[userId];
+            
+            // Cập nhật hiển thị trạng thái
+            const statusCell = document.getElementById(`status-${userId}`);
+            const button = document.getElementById(`btn-${userId}`);
+            
+            if (userLockStatus[userId]) {
+                // Trạng thái khóa
+                statusCell.innerHTML = '<span class="text-danger">Đã khóa</span>';
+                button.innerHTML = 'Mở khóa';
+                button.classList.remove('btn-lock');
+                button.classList.add('btn-unlock');
+            } else {
+                // Trạng thái mở khóa
+                statusCell.innerHTML = '<span class="text-success">Không bị khóa</span>';
+                button.innerHTML = 'Khóa';
+                button.classList.remove('btn-unlock');
+                button.classList.add('btn-lock');
+            }
+        }
     </script>
     <script src="/js/common.js"></script>
 </body>
