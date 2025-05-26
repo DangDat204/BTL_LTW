@@ -48,4 +48,13 @@ public class HomeController {
     public String managerRoom(){
         return "admin/manager-room.html";
     }
+
+    @GetMapping("/tin1")
+    public String tin1(){
+        return "user/new-1.html";
+    }
+    @GetMapping("/tin2")
+    public String tin2(){
+        return "user/new-2.html";
+    }
 }

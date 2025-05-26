@@ -38,6 +38,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINTS).permitAll()
                         .requestMatchers(HttpMethod.GET, PUBLIC_ENDPOINTS2).permitAll()
                         .requestMatchers(HttpMethod.GET, "/home/account").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/home/tin1").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/home/tin2").permitAll()
                         // tenant
                         .requestMatchers(HttpMethod.GET, "/home/view-schedule").permitAll()
                         // landlord
